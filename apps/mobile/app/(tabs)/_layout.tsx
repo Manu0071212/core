@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import { useWindowDimensions, View, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import * as Linking from "expo-linking";
 import { useRouter, usePathname } from "expo-router";
-import { Home, Folder, Cpu, BookText, LogOut, Package } from "lucide-react-native";
+import { Home, Folder, Cpu, BookText, LogOut, User as UserIcon } from "lucide-react-native";
 import { useAuth } from "../../context/AuthContext";
 
 export default function TabsLayout() {
@@ -32,15 +32,7 @@ export default function TabsLayout() {
     );
   };
 
-  const InventoryNavItem = () => (
-    <TouchableOpacity
-      onPress={() => Linking.openURL("https://deti-makerlab.ua.pt/new/snipe-it")}
-      className="flex-row items-center gap-3 px-4 py-3 rounded-xl mb-1 hover:bg-gray-50"
-    >
-      <Package size={20} color="#6B7280" />
-      <Text className="text-sm font-medium text-gray-500">Inventory</Text>
-    </TouchableOpacity>
-  );
+
 
   return (
     <View className="flex-1 flex-row bg-[#f4f5f7]">
@@ -59,7 +51,7 @@ export default function TabsLayout() {
             <NavItem icon={Folder}  route="/(tabs)/projects"  label="Projects" />
             <NavItem icon={Cpu}     route="/(tabs)/equipment" label="Equipment" />
             <NavItem icon={BookText} route="/(tabs)/ledger"  label="Ledger" />
-            <InventoryNavItem />
+            <NavItem icon={UserIcon} route="/(tabs)/user"      label="Profile" />
           </View>
 
           <TouchableOpacity
@@ -87,7 +79,7 @@ export default function TabsLayout() {
           <Tabs.Screen name="projects"  options={{ title: "Projects",  tabBarIcon: ({ color }) => <Folder size={22} color={color} /> }} />
           <Tabs.Screen name="equipment" options={{ title: "Equipment", tabBarIcon: ({ color }) => <Cpu size={22} color={color} /> }} />
           <Tabs.Screen name="ledger"    options={{ title: "Ledger",     tabBarIcon: ({ color }) => <BookText size={22} color={color} /> }} />
-          <Tabs.Screen name="inventory" options={{ title: "Inventory", tabBarIcon: ({ color }) => <Package size={22} color={color} /> }} />
+          <Tabs.Screen name="user"      options={{ title: "Profile",    tabBarIcon: ({ color }) => <UserIcon size={22} color={color} /> }} />
 
           <Tabs.Screen name="admin" options={{ href: null }} />
           <Tabs.Screen name="statistics" options={{ href: null }} />

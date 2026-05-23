@@ -1,6 +1,12 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
+// API_BASE configuration:
+// - For local development, create a '.env.local' file in 'apps/mobile/' and set:
+//   EXPO_PUBLIC_API_URL=http://<YOUR_WINDOWS_IP>:8000
+//   (Ensure the backend API binds to 0.0.0.0 and your phone is on the same Wi-Fi)
+// - For production/deployment, set EXPO_PUBLIC_API_URL in the build environment or CI/CD,
+//   otherwise it falls back to the production URL.
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL ?? "https://deti-makerlab.ua.pt/new/api";
 

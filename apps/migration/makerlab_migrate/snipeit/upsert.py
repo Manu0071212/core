@@ -188,7 +188,7 @@ def create_asset(
     payload = {
         "model_id": model_id,
         "asset_tag": asset_tag,
-        "status_id": 1,  # Default to "Ready to Deploy" or similar
+        "status_id": 2,  # "Ready to Deploy" (deployable/available)
     }
     
     if name:

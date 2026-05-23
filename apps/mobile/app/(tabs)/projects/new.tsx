@@ -122,7 +122,7 @@ export default function NewProjectPage() {
 
   if (loading) return (
     <View className="flex-1 items-center justify-center bg-[#f4f5f7]">
-      <ActivityIndicator color="#4F46E5" />
+      <ActivityIndicator color="#3A922A" />
     </View>
   );
 
@@ -150,7 +150,7 @@ export default function NewProjectPage() {
           {/* Section: Project Info */}
           <View className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <View className="flex-row items-center mb-4 gap-2">
-              <FileText size={18} color="#4F46E5" />
+              <FileText size={18} color="#3A922A" />
               <Text className="font-bold text-gray-900">Project Information</Text>
             </View>
             
@@ -221,7 +221,7 @@ export default function NewProjectPage() {
                     }}
                   >
                     <Text className="text-sm">{u.name}</Text>
-                    <Plus size={16} color="#4F46E5" />
+                    <Plus size={16} color="#3A922A" />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -238,7 +238,7 @@ export default function NewProjectPage() {
             {/* Current User */}
             <View className="flex-row items-center justify-between p-3 bg-indigo-50 rounded-xl mb-2">
               <Text className="text-sm font-semibold text-indigo-700">{currentUser?.name} (You)</Text>
-              <Text className="text-[10px] font-bold uppercase text-indigo-400">Leader</Text>
+              <Text className="text-[10px] font-bold uppercase text-indigo-500">Leader</Text>
             </View>
 
             {members.filter(m => m.role !== 'supervisor').map(m => (
@@ -373,7 +373,7 @@ export default function NewProjectPage() {
           <TouchableOpacity 
             onPress={handleSubmit}
             disabled={submitting}
-            className={`py-4 rounded-2xl items-center ${submitting ? 'bg-indigo-300' : 'bg-indigo-600'}`}
+            className={`py-4 rounded-2xl items-center ${submitting ? 'bg-indigo-200' : 'bg-indigo-600'}`}
           >
             {submitting ? (
               <ActivityIndicator color="white" />

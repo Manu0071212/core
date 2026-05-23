@@ -241,6 +241,8 @@ _docpress
 lib
 !apps/web/src/lib/
 !apps/web/src/lib/**
+!apps/mobile/lib/
+!apps/mobile/lib/**
 dist
 tsconfig.tsbuildinfo
 test.lib/

@@ -57,7 +57,7 @@ export default function ProjectsPage() {
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#4f46e5" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#3A922A" />
         }
       >
         <View className="flex-row flex-wrap justify-between items-start gap-3 mb-5">
@@ -101,8 +101,8 @@ export default function ProjectsPage() {
               onPress={() => setFilter(f)}
               className="px-4 py-2 rounded-xl border"
               style={{
-                backgroundColor: filter === f ? "#4f46e5" : "#fff",
-                borderColor: filter === f ? "#4f46e5" : "#e5e7eb",
+                backgroundColor: filter === f ? "#3A922A" : "#fff",
+                borderColor: filter === f ? "#3A922A" : "#e5e7eb",
               }}
             >
               <Text style={{ color: filter === f ? "#fff" : "#6b7280" }} className="text-sm font-bold">

@@ -14,7 +14,7 @@ export default function TabsLayout() {
 
   if (isLoading) return (
     <View className="flex-1 items-center justify-center bg-[#f4f5f7]">
-      <ActivityIndicator size="large" color="#4F46E5" />
+      <ActivityIndicator size="large" color="#3A922A" />
     </View>
   );
 
@@ -79,7 +79,7 @@ export default function TabsLayout() {
           headerStyle: { backgroundColor: "#fff" },
           headerTitleStyle: { fontWeight: "bold", color: "#111827" },
           tabBarStyle: isMobile ? { borderTopColor: "#E5E7EB" } : { display: "none" },
-          tabBarActiveTintColor: "#4F46E5",
+          tabBarActiveTintColor: "#3A922A",
           tabBarInactiveTintColor: "#9CA3AF",
         }}>
           <Tabs.Screen name="index"     options={{ title: "Home",      tabBarIcon: ({ color }) => <Home size={22} color={color} /> }} />

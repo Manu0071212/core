@@ -56,7 +56,7 @@ export default function LedgerPage() {
     return events.filter((e) => e.assetName.toLowerCase().includes(q) || e.userName.toLowerCase().includes(q) || e.projectName.toLowerCase().includes(q));
   }, [events, search]);
 
-  if (loading) return <View className="flex-1 items-center justify-center bg-[#f4f5f7]"><ActivityIndicator size="large" color="#4F46E5" /></View>;
+  if (loading) return <View className="flex-1 items-center justify-center bg-[#f4f5f7]"><ActivityIndicator size="large" color="#3A922A" /></View>;
 
   return (
     <ScrollView

@@ -32,7 +32,7 @@ export default function AuthCallback() {
 
   return (
     <View className="flex-1 items-center justify-center bg-[#f4f5f7]">
-      <ActivityIndicator size="large" color="#4F46E5" />
+      <ActivityIndicator size="large" color="#3A922A" />
       <Text className="text-gray-400 mt-4 text-sm">Authenticating...</Text>
     </View>
   );

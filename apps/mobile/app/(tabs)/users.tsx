@@ -38,14 +38,14 @@ export default function UsersPage() {
   });
 
   const roleConfig: Record<string, { bg: string; text: string; label: string }> = {
-    student:        { bg: "#eef2ff", text: "#4f46e5", label: "Student" },
+    student:        { bg: "#ebf5ea", text: "#3A922A", label: "Student" },
     professor:      { bg: "#faf5ff", text: "#9333ea", label: "Professor" },
     lab_technician: { bg: "#f0fdf4", text: "#16a34a", label: "Tech" },
   };
 
   if (loading) return (
     <View className="flex-1 items-center justify-center bg-[#f4f5f7]">
-      <ActivityIndicator size="large" color="#4F46E5" />
+      <ActivityIndicator size="large" color="#3A922A" />
     </View>
   );
 
@@ -54,7 +54,7 @@ export default function UsersPage() {
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#4f46e5" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#3A922A" />
         }
       >
         <View className="mb-5">
@@ -80,8 +80,8 @@ export default function UsersPage() {
               onPress={() => setActiveFilter(f)}
               className="px-4 py-2 rounded-xl border"
               style={{
-                backgroundColor: activeFilter === f ? "#4f46e5" : "#fff",
-                borderColor: activeFilter === f ? "#4f46e5" : "#e5e7eb",
+                backgroundColor: activeFilter === f ? "#3A922A" : "#fff",
+                borderColor: activeFilter === f ? "#3A922A" : "#e5e7eb",
               }}
             >
               <Text style={{ color: activeFilter === f ? "#fff" : "#6b7280" }} className="text-sm font-bold">

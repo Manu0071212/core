@@ -114,7 +114,7 @@ export default function Header() {
 
           {/* Botão de Perfil */}
           <TouchableOpacity 
-            onPress={() => router.push("/profile")}
+            onPress={() => user && router.push(`/(tabs)/users/${user.id}` as any)}
             className="p-2"
           >
             <Feather name="user" size={26} color="#9ca3af" />

@@ -53,7 +53,9 @@ export default function EquipmentPage() {
   useEffect(() => { load(); }, [load]);
 
   const categories = useMemo(() => {
-    const cats = new Set(catalog.map((i) => i.category).filter(Boolean));
+    const cats = new Set(
+      catalog.map((i) => i.category).filter((cat): cat is string => Boolean(cat)),
+    );
     return ["All Categories", ...Array.from(cats).sort()];
   }, [catalog]);
 
@@ -70,7 +72,7 @@ export default function EquipmentPage() {
 
   if (loading) return (
     <View className="flex-1 items-center justify-center bg-[#f4f5f7]">
-      <ActivityIndicator size="large" color="#4F46E5" />
+      <ActivityIndicator size="large" color="#3A922A" />
     </View>
   );
 
@@ -79,7 +81,7 @@ export default function EquipmentPage() {
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#4f46e5" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#3A922A" />
         }
       >
         {/* Header */}
@@ -122,7 +124,7 @@ export default function EquipmentPage() {
                 <Text
                   className="text-sm"
                   style={{
-                    color: activeCategory === cat ? "#4f46e5" : "#374151",
+                    color: activeCategory === cat ? "#3A922A" : "#374151",
                     fontWeight: activeCategory === cat ? "700" : "400",
                   }}
                 >
@@ -140,8 +142,8 @@ export default function EquipmentPage() {
               onPress={() => setActiveStatus(f)}
               className="px-4 py-2 rounded-xl border"
               style={{
-                backgroundColor: activeStatus === f ? "#4f46e5" : "#fff",
-                borderColor: activeStatus === f ? "#4f46e5" : "#e5e7eb",
+                backgroundColor: activeStatus === f ? "#3A922A" : "#fff",
+                borderColor: activeStatus === f ? "#3A922A" : "#e5e7eb",
               }}
             >
               <Text style={{ color: activeStatus === f ? "#fff" : "#6b7280" }} className="text-sm font-bold whitespace-nowrap">

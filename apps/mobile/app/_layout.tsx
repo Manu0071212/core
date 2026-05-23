@@ -16,14 +16,14 @@ function RootNavigator() {
     const sub = Linking.addEventListener("url", async ({ url }) => {
       const parsed = Linking.parse(url);
       const token = parsed.queryParams?.token;
-      if (token) await saveToken(token);
+      if (typeof token === "string") await saveToken(token);
     });
 
     Linking.getInitialURL().then(async (url) => {
       if (!url) return;
       const parsed = Linking.parse(url);
       const token = parsed.queryParams?.token;
-      if (token) await saveToken(token);
+      if (typeof token === "string") await saveToken(token);
     });
 
     return () => sub.remove();

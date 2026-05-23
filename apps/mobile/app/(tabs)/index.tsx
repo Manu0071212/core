@@ -81,7 +81,7 @@ export default function HomePage() {
     <ScrollView
       className="flex-1 bg-[#f4f5f7]"
       contentContainerStyle={{ paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#4f46e5" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#3A922A" />}
     >
       <View className="px-5 pt-6">
 
@@ -231,7 +231,7 @@ export default function HomePage() {
                   className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
                 >
                   <View className="h-24 bg-indigo-50 items-center justify-center">
-                    <Folder size={34} color="#a5b4fc" strokeWidth={1.5} />
+                    <Folder size={34} color="#a9d9aa" strokeWidth={1.5} />
                   </View>
                   <View className="p-3">
                     <Text className="font-bold text-gray-900 text-sm mb-1" numberOfLines={1}>{proj.name}</Text>

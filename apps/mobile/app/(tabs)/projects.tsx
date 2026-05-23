@@ -136,7 +136,7 @@ export default function ProjectsPage() {
               return (
                 <TouchableOpacity
                   key={proj.id}
-                  onPress={() => router.push(`/(tabs)/project/${proj.id}` as any)}
+                  onPress={() => router.push(`/(tabs)/projects/${proj.id}` as any)}
                   className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 shadow-sm flex-row items-center justify-between gap-3"
                 >
                   <View className="flex-1 gap-1.5 min-w-0">

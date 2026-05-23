@@ -125,7 +125,7 @@ export default function HomePage() {
                         {searchResults.projects.slice(0, 3).map((p) => (
                           <TouchableOpacity
                             key={p.id}
-                            onPress={() => { setSearchResults(null); setSearch(""); router.push(`/(tabs)/project/${p.id}` as any); }}
+                            onPress={() => { setSearchResults(null); setSearch(""); router.push(`/(tabs)/projects/${p.id}` as any); }}
                             className="flex-row items-center gap-3 px-5 py-2.5"
                           >
                             <Folder size={16} color="#9ca3af" />
@@ -227,7 +227,7 @@ export default function HomePage() {
                 <TouchableOpacity
                   key={proj.id}
                   style={{ width: "47.5%" }}
-                  onPress={() => router.push(`/(tabs)/project/${proj.id}` as any)}
+                  onPress={() => router.push(`/(tabs)/projects/${proj.id}` as any)}
                   className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
                 >
                   <View className="h-24 bg-indigo-50 items-center justify-center">

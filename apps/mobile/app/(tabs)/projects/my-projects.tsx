@@ -169,7 +169,7 @@ export default function MyProjectsPage() {
                 project={proj}
                 requisitions={reqsByProject[proj.id] ?? []}
                 assetNames={assetNames}
-                onPress={() => router.push(`/(tabs)/project/${proj.id}` as any)}
+                onPress={() => router.push(`/(tabs)/projects/${proj.id}` as any)}
               />
             ))}
           </View>

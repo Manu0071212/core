@@ -50,9 +50,9 @@ export default function UsersPage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 mb-6 w-full">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-6 w-full">
         
-        <div className="relative flex-1">
+        <div className="relative flex-1 w-full">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 placeholder:text-gray-400 transition-all shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
@@ -62,18 +62,18 @@ export default function UsersPage() {
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:pb-0">
+        <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           {filterOptions.map((option) => {
             const label = option === "All" ? t("usersPage.all") : 
-                         option === "Students" ? t("usersPage.students") : 
-                         option === "Professors" ? t("usersPage.professors") : 
-                         t("usersPage.technician");
+                         option === "Students" ? t("usersPage.studentsFilter") : 
+                         option === "Professors" ? t("usersPage.professorsFilter") : 
+                         t("usersPage.technicianFilter");
             
             return (
               <button
                 key={option}
                 onClick={() => setActiveFilter(option)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
+                className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
                   activeFilter === option
                     ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                     : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
@@ -85,7 +85,6 @@ export default function UsersPage() {
           })}
         </div>
       </div>
-
 
       {!loading && (
         <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-1">
@@ -112,40 +111,44 @@ export default function UsersPage() {
             <Link
               key={user.id}
               href={`/users/${user.id}`}
-              className="group bg-white border border-transparent hover:border-indigo-100 rounded-2xl p-5 flex items-start gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer"
+              className="group bg-white border border-transparent hover:border-indigo-100 rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer"
             >
-              <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 text-gray-400 font-bold text-[18px] group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors border border-gray-100">
+              <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 text-gray-400 font-bold text-[18px] group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors border border-gray-100 mt-0.5 sm:mt-0">
                 {user.name.charAt(0).toUpperCase()}
               </div>
 
-              <div className="flex flex-col gap-1 overflow-hidden w-full">
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-bold text-gray-900 text-base truncate group-hover:text-indigo-600 transition-colors">
+              <div className="flex flex-col gap-1 sm:gap-1.5 overflow-hidden w-full min-w-0">
+                
+                <div className="flex flex-col items-start gap-1 min-w-0 mb-0.5">
+                  <h3 className="font-bold text-gray-900 text-base break-words line-clamp-2 group-hover:text-indigo-600 transition-colors min-w-0">
                     {user.name}
                   </h3>
-                  <span className={`shrink-0 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-lg ${
-                    user.role === 'professor' ? 'bg-purple-50 text-purple-600' :
-                    user.role === 'lab_technician' ? 'bg-emerald-50 text-emerald-600' :
-                    'bg-indigo-50 text-indigo-600'
-                  }`}>
-                    {user.role === 'lab_technician' ? t("usersPage.staff") : user.role === 'student' ? t("usersPage.students") : t("usersPage.professors")}
-                  </span>
+                  
+                  <div className="flex min-w-0">
+                    <span className={`inline-block max-w-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-lg truncate sm:whitespace-normal sm:break-words ${
+                      user.role === 'professor' ? 'bg-purple-50 text-purple-600' :
+                      user.role === 'lab_technician' ? 'bg-emerald-50 text-emerald-600' :
+                      'bg-indigo-50 text-indigo-600'
+                    }`}>
+                      {user.role === 'lab_technician' ? t("usersPage.staff") : user.role === 'student' ? t("usersPage.students") : t("usersPage.professors")}
+                    </span>
+                  </div>
                 </div>
                 
-                <p className="flex items-center gap-1.5 text-[13px] text-gray-400 truncate font-medium">
-                  <Mail size={12} className="shrink-0 text-gray-300" />
-                  {user.email}
-                </p>
+                <div className="flex items-start gap-1.5 text-[13px] text-gray-400 font-medium min-w-0">
+                  <Mail size={12} className="shrink-0 text-gray-300 mt-1" />
+                  <span className="break-all line-clamp-2 min-w-0">{user.email}</span>
+                </div>
                 
                 {user.role === 'student' && user.nmec && (
-                  <p className="text-[11px] text-gray-400 font-bold tracking-tight">
+                  <p className="text-[11px] text-gray-400 font-bold tracking-tight min-w-0">
                     {user.nmec}
                   </p>
                 )}
                 
                 {user.course && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="inline-block px-2 py-0.5 bg-gray-50 border border-gray-100 text-gray-400 text-[10px] font-bold rounded-lg truncate max-w-full uppercase">
+                  <div className="flex items-start gap-2 mt-0.5 sm:mt-1 min-w-0">
+                    <span className="inline-block max-w-full px-2 py-0.5 bg-gray-50 border border-gray-100 text-gray-400 text-[10px] font-bold rounded-lg uppercase min-w-0 truncate sm:whitespace-normal sm:line-clamp-2 sm:break-words text-left">
                       {user.course}
                     </span>
                   </div>

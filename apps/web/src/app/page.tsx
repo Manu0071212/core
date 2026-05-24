@@ -76,17 +76,17 @@ function HomeContent() {
   };
 
   const activeProjects  = projectList.filter((p) => p.status === "active").length;
-  const pendingProjects = projectList.filter((p) => p.status === "pending").length;
+  const checkedOut         = catalogList.filter((e) => e.status === "checked_out").length;
   const availableEquip  = catalogList.filter((e) => e.available).length;
   const recentProjects  = [...projectList]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 4);
 
   return (
-    <main className="flex-1 p-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
+    <main className="flex-1 px-3 py-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
         <Header />
 
-        <div className="flex flex-col items-center text-center mb-10 mt-4 px-2">
+        <div className="flex flex-col items-center text-center mb-10 mt-4 px-1 sm:px-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 text-gray-900 leading-tight">
             {t("home.title")}{" "}
             <span className="text-indigo-600">{t("home.titleHighlight")}</span>
@@ -209,11 +209,11 @@ function HomeContent() {
               label={t("home.labMembers")}
             />
           </Link>
-          <Link href="/projects" className="block">
+          <Link href="/equipment" className="block">
             <StatCard
               icon={<Activity size={20} className="text-yellow-500" />}
               iconBg="bg-yellow-50"
-              value={loading ? "..." : String(pendingProjects)}
+              value={loading ? "..." : String(checkedOut)}
               label={t("home.checkedOut")}
             />
           </Link>

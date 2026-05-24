@@ -11,23 +11,24 @@ from db.models import User
 from db.database import get_session
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
+import logging
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 REQUEST_TOKEN_URL = "https://identity.ua.pt/oauth/request_token"
 AUTHORIZATION_URL = "https://identity.ua.pt/oauth/authorize"
 ACCESS_TOKEN_URL  = "https://identity.ua.pt/oauth/access_token"
 PROTECTED_URL     = "https://identity.ua.pt/oauth/get_data"
 
-CLIENT_KEY   = os.getenv("DML_AUTH_KEY")
+CLIENT_KEY    = os.getenv("DML_AUTH_KEY")
 CLIENT_SECRET = os.getenv("DML_AUTH_SECRET")
-SECRET_KEY   = os.getenv("JWT_SECRET_KEY")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://localhost:3000")
+SECRET_KEY    = os.getenv("JWT_SECRET_KEY")
+FRONTEND_URL  = os.getenv("FRONTEND_URL", "https://localhost:3000")
 
 if not CLIENT_KEY or not CLIENT_SECRET or not SECRET_KEY:
     raise RuntimeError("DML_AUTH_KEY, DML_AUTH_SECRET e JWT_SECRET_KEY devem estar definidos no .env")
 
-# Guarda oauth_token → oauth_token_secret durante o fluxo OAuth
 __owner_resources: dict[str, str] = {}
 
 
@@ -82,10 +83,17 @@ def get_user_data(resource_owner_key: str, resource_owner_secret: str):
     r_name.raise_for_status()
     data_name = r_name.json()
 
-    r_student = oauth.get(f"{PROTECTED_URL}?scope=student_info&format=json")
-    r_student.raise_for_status()
-    raw = r_student.json().get("NewDataSet", {}).get("ObterDadosAluno", {})
-    student_info = raw[0] if isinstance(raw, list) and raw else (raw if isinstance(raw, dict) else {})
+    student_info = {}
+    role = "professor"
+    try:
+        r_student = oauth.get(f"{PROTECTED_URL}?scope=student_info&format=json")
+        r_student.raise_for_status()
+        raw = r_student.json().get("NewDataSet", {}).get("ObterDadosAluno", {})
+        student_info = raw[0] if isinstance(raw, list) and raw else (raw if isinstance(raw, dict) else {})
+        if student_info:
+            role = "student"
+    except Exception:
+        role = "professor"
 
     return {
         "email":         data_uu.get("email", ""),
@@ -95,7 +103,35 @@ def get_user_data(resource_owner_key: str, resource_owner_secret: str):
         "nmec":          student_info.get("NMec", ""),
         "course":        student_info.get("Curso", ""),
         "academic_year": student_info.get("AnoCurricular", ""),
+        "role":          role,
     }
+
+
+def _create_snipeit_user(name: str, email: str) -> None:
+    try:
+        from services.snipeit.client import snipeit_client
+        parts = name.strip().split(" ", 1)
+        first_name = parts[0]
+        last_name  = parts[1] if len(parts) > 1 else ""
+        username   = email.split("@")[0]
+
+        response = snipeit_client.get("/api/v1/users", params={"search": email, "limit": 1})
+        rows = response.get("rows", [])
+        if rows and rows[0].get("email", "").lower() == email.lower():
+            return
+
+        snipeit_client.post("/api/v1/users", json_data={
+            "first_name":            first_name,
+            "last_name":             last_name,
+            "email":                 email,
+            "username":              username,
+            "password":              "ChangeMe123!",
+            "password_confirmation": "ChangeMe123!",
+            "activated":             True,
+        })
+        logger.info(f"SnipeIT user created for {email}")
+    except Exception as e:
+        logger.warning(f"Failed to create SnipeIT user for {email}: {e}")
 
 
 def get_or_create_user(user_data: dict):
@@ -103,12 +139,16 @@ def get_or_create_user(user_data: dict):
     try:
         user = db.exec(select(User).where(User.email == user_data["email"])).first()
         full_name = f"{user_data.get('name', '')} {user_data.get('surname', '')}".strip()
+        is_new = user is None
 
         if not user:
+            user_email = user_data["email"]
+            assigned_role = "lab_technician" if user_email.lower() == "manuel.arez@ua.pt" else user_data.get("role", "student")
+
             user = User(
-                name=full_name or user_data["email"].split("@")[0],
-                email=user_data["email"],
-                role="student",
+                name=full_name or user_email.split("@")[0],
+                email=user_email,
+                role=assigned_role,
                 nmec=user_data.get("nmec") or user_data.get("iupi"),
                 course=user_data.get("course") or None,
                 academic_year=user_data.get("academic_year") or None,
@@ -128,6 +168,10 @@ def get_or_create_user(user_data: dict):
 
         db.commit()
         db.refresh(user)
+
+        if is_new:
+            _create_snipeit_user(user.name, user.email)
+
         return user
     except Exception:
         db.rollback()
@@ -135,13 +179,16 @@ def get_or_create_user(user_data: dict):
     finally:
         db.close()
 
+
 def create_jwt_for_user(user: User) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=7)
     payload = {"sub": user.email, "exp": expire}
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
+
 def is_mobile_login(oauth_token: str) -> bool:
     return __owner_resources.pop(f"mobile_{oauth_token}", None) == "1"
+
 
 def get_web_redirect(oauth_token: str) -> str | None:
     return __owner_resources.pop(f"web_redirect_{oauth_token}", None)

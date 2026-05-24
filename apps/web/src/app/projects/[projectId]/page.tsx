@@ -62,7 +62,7 @@ function TimelineItem({ icon, label, date, color }: {
 function MemberAvatar({ name, color = "bg-gray-200 text-gray-500" }: { name?: string; color?: string }) {
   const initial = name ? name.charAt(0).toUpperCase() : "?";
   return (
-    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${color}`}>
+    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${color}`}>
       {initial}
     </div>
   );
@@ -129,15 +129,15 @@ function EditProjectModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white w-full sm:max-w-xl rounded-t-[24px] sm:rounded-[24px] shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold">{t("projectsPage.details.edit.title")}</h2>
+      <div className="bg-white w-full sm:max-w-xl rounded-t-[24px] sm:rounded-[24px] shadow-xl max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 sm:px-8 pt-5 sm:pt-8 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+          <h2 className="text-lg sm:text-xl font-bold">{t("projectsPage.details.edit.title")}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
             <X size={20} className="text-gray-400" />
           </button>
         </div>
 
-        <div className="px-6 sm:px-8 py-6 flex flex-col gap-4">
+        <div className="px-5 sm:px-8 py-5 flex flex-col gap-4">
           <div>
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">
               {t("projectsPage.new.projectName")} <span className="text-red-400">*</span>
@@ -159,7 +159,7 @@ function EditProjectModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">{t("projectsPage.new.course")}</label>
               <input
@@ -198,7 +198,7 @@ function EditProjectModal({
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
               />
-              <button onClick={addTag} className="p-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-700">
+              <button onClick={addTag} className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">
                 <Plus size={16} />
               </button>
             </div>
@@ -226,7 +226,7 @@ function EditProjectModal({
                 onChange={(e) => setLinkInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLink())}
               />
-              <button onClick={addLink} className="p-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-700">
+              <button onClick={addLink} className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">
                 <Plus size={16} />
               </button>
             </div>
@@ -234,8 +234,8 @@ function EditProjectModal({
               <div className="flex flex-col gap-1.5">
                 {links.map((l) => (
                   <div key={l} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                    <span className="text-xs text-blue-500 truncate max-w-[90%]">{l}</span>
-                    <button onClick={() => setLinks(links.filter((x) => x !== l))}>
+                    <span className="text-xs text-blue-500 break-all mr-2">{l}</span>
+                    <button onClick={() => setLinks(links.filter((x) => x !== l))} className="shrink-0">
                       <X size={13} className="text-gray-300 hover:text-red-400" />
                     </button>
                   </div>
@@ -249,14 +249,14 @@ function EditProjectModal({
           )}
         </div>
 
-        <div className="flex gap-3 px-6 sm:px-8 pb-6 sm:pb-8">
+        <div className="flex gap-3 px-5 sm:px-8 pb-6 sm:pb-8 sticky bottom-0 bg-white pt-2 border-t border-gray-100">
           <button onClick={onClose} className="flex-1 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 text-sm">
             {t("projectsPage.new.cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-700 disabled:opacity-50 text-sm"
+            className="flex-1 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 text-sm"
           >
             {saving ? t("projectsPage.details.edit.saving") : t("projectsPage.details.edit.saveChanges")}
           </button>
@@ -309,19 +309,19 @@ function RequestEquipmentModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-white w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] shadow-xl max-h-[90vh] flex flex-col">
+      <div className="bg-white w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] shadow-xl max-h-[92vh] flex flex-col">
 
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-gray-100 shrink-0">
           <div>
-            <h2 className="text-lg font-bold">{t("projectsPage.details.requestModal.title")}</h2>
+            <h2 className="text-base sm:text-lg font-bold">{t("projectsPage.details.requestModal.title")}</h2>
             <p className="text-xs text-gray-400 mt-0.5">{t("projectsPage.details.requestModal.subtitle")}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors ml-3 shrink-0">
             <X size={20} className="text-gray-400" />
           </button>
         </div>
 
-        <div className="px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-1">
+        <div className="px-5 sm:px-6 py-4 flex flex-col gap-4 overflow-y-auto flex-1">
           {loadingCat ? (
             <div className="text-gray-400 text-sm animate-pulse py-8 text-center">{t("projectsPage.details.requestModal.loading")}</div>
           ) : catalog.length === 0 ? (
@@ -338,13 +338,13 @@ function RequestEquipmentModal({
                 <div className="flex flex-col gap-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("projectsPage.new.selected", { count: items.length })}</p>
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-1.5 bg-white rounded-lg border border-indigo-100 shrink-0">
+                    <div key={item.id} className="flex items-start justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100 gap-2">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="p-1.5 bg-white rounded-lg border border-indigo-100 shrink-0 mt-0.5">
                           <Cpu size={13} className="text-indigo-400" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold text-gray-800 truncate">{item.name}</div>
+                          <div className="text-sm font-semibold text-gray-800 break-words">{item.name}</div>
                           {item.asset_tag && (
                             <div className="text-xs text-gray-400">{item.asset_tag}{item.location ? ` · ${item.location}` : ""}</div>
                           )}
@@ -352,7 +352,7 @@ function RequestEquipmentModal({
                       </div>
                       <button
                         onClick={() => setItems(items.filter((i) => i.id !== item.id))}
-                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors shrink-0 ml-2"
+                        className="p-1.5 hover:bg-red-50 rounded-lg transition-colors shrink-0"
                       >
                         <X size={14} className="text-gray-400 hover:text-red-400" />
                       </button>
@@ -383,18 +383,18 @@ function RequestEquipmentModal({
                     <button
                       key={m.id}
                       onClick={() => { setItems([...items, m]); setSearch(""); }}
-                      className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 transition-colors text-left w-full"
+                      className="flex items-start gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-100 transition-colors text-left w-full"
                     >
-                      <div className="p-1.5 bg-white rounded-lg border border-gray-100 shrink-0">
+                      <div className="p-1.5 bg-white rounded-lg border border-gray-100 shrink-0 mt-0.5">
                         <Cpu size={13} className="text-gray-400" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{m.name}</div>
+                        <div className="text-sm font-semibold text-gray-800 break-words">{m.name}</div>
                         <div className="text-xs text-gray-400">
                           {m.asset_tag ? `${m.asset_tag} · ` : ""}{m.location ?? t("projectsPage.new.noLocation")}
                         </div>
                       </div>
-                      <Plus size={14} className="text-gray-400 shrink-0" />
+                      <Plus size={14} className="text-gray-400 shrink-0 mt-1" />
                     </button>
                   ))}
                 </div>
@@ -407,7 +407,7 @@ function RequestEquipmentModal({
           )}
         </div>
 
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
+        <div className="flex gap-3 px-5 sm:px-6 py-4 border-t border-gray-100 shrink-0">
           <button
             onClick={onClose}
             className="flex-1 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 text-sm"
@@ -439,9 +439,11 @@ export default function ProjectDetailPage() {
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [showEditModal, setShowEditModal]       = useState(false);
   const [showReqModal, setShowReqModal]         = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showBlockedModal, setShowBlockedModal]   = useState(false);
 
   const loadRequisitions = useCallback(async () => {
     const reqs = await requisitionsApi.listByProject(projectId).catch(() => [] as Requisition[]);
@@ -471,6 +473,7 @@ export default function ProjectDetailPage() {
         setProject(proj);
         const me = await auth.me().catch(() => null);
         setCurrentUserId(me?.id ?? null);
+        setCurrentUserRole(me?.role ?? null);
         const memberIds = [...new Set((proj.members ?? []).map((m) => m.user_id))];
         const userResults = await Promise.allSettled(memberIds.map((id) => usersApi.get(id)));
         const map: Record<number, User> = {};
@@ -491,6 +494,17 @@ export default function ProjectDetailPage() {
     requisitionsApi.syncSnipeit().catch(console.error);
   }, []);
 
+  const allReturned = requisitions.length === 0 ||
+    requisitions.every((r) => r.status === "returned" || r.status === "rejected" || r.status === "cancelled");
+
+  const handleCompleteClick = () => {
+    if (!allReturned) {
+      setShowBlockedModal(true);
+    } else {
+      setShowCompleteModal(true);
+    }
+  };
+
   if (loading) return (
     <main className="p-6 bg-[#f4f5f7] min-h-screen font-sans">
       <Header />
@@ -510,6 +524,14 @@ export default function ProjectDetailPage() {
     </main>
   );
 
+  const isLabTech = currentUserRole === "lab_technician";
+  const isMember = currentUserId !== null &&
+    (project.members ?? []).some((m) => m.user_id === currentUserId);
+  // Lab technician can always see all buttons; members can see buttons for their own active/pending projects
+  const canEdit = isLabTech || (isMember && ["pending", "active"].includes(project.status));
+  const canComplete = isLabTech || (isMember && project.status === "active");
+  const canRequestEquipment = isLabTech || (isMember && ["pending", "active"].includes(project.status));
+
   const supervisorMembers = (project.members ?? []).filter((m) => m.role === "supervisor");
   const teamMembers       = (project.members ?? []).filter((m) => m.role !== "supervisor");
   const tags  = project.tags  ? project.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
@@ -517,8 +539,6 @@ export default function ProjectDetailPage() {
   const createdAt = new Date(project.created_at).toLocaleDateString("pt-PT", {
     year: "numeric", month: "long", day: "numeric",
   });
-  const isMember = currentUserId !== null &&
-    (project.members ?? []).some((m) => m.user_id === currentUserId);
 
   return (
     <main className="flex-1 bg-[#f4f5f7] px-4 sm:px-8 py-6 min-h-screen font-sans text-gray-900">
@@ -531,38 +551,43 @@ export default function ProjectDetailPage() {
         <ArrowLeft size={16} /> {t("projectsPage.new.back")}
       </Link>
 
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+      {/* Header block — title + action buttons */}
+      <div className="flex flex-col gap-4 mb-6">
         <div className="min-w-0">
           <div className="flex items-center gap-3 flex-wrap mb-1">
-            <h1 className="text-2xl sm:text-3xl font-bold truncate">{project.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{project.name}</h1>
             <StatusBadge status={project.status} />
           </div>
           <p className="text-gray-400 text-sm max-w-2xl">{project.description || t("projectsPage.details.noDescription")}</p>
         </div>
 
-        {isMember && ["pending", "active"].includes(project.status) && (
-          <div className="flex flex-wrap gap-2 shrink-0">
-            {project.status === "active" && (
+        {/* Action buttons — stack on mobile, row on larger screens */}
+        {(canEdit || canComplete || canRequestEquipment) && (
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+            {canComplete && project.status === "active" && (
               <button
-                onClick={() => setShowCompleteModal(true)}
-                className="flex items-center gap-2 px-3 py-2 border border-green-200 text-green-600 rounded-xl text-sm font-semibold hover:bg-green-50 transition-colors"
+                onClick={handleCompleteClick}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-indigo-600 text-indigo-600 rounded-xl text-sm font-semibold hover:bg-indigo-50 transition-colors"
               >
                 <CheckCircle2 size={15} /> {t("projectsPage.details.complete")}
               </button>
             )}
-            <button
-              onClick={() => setShowReqModal(true)}
-              className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors bg-white"
-            >
-              <Cpu size={15} /> {t("projectsPage.details.requestEquipment")}
-            </button>
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-700 transition-colors"
-            >
-              {t("projectsPage.details.editProject")}
-            </button>
+            {canRequestEquipment && (
+              <button
+                onClick={() => setShowReqModal(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors bg-white"
+              >
+                <Cpu size={15} /> {t("projectsPage.details.requestEquipment")}
+              </button>
+            )}
+            {canEdit && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+              >
+                {t("projectsPage.details.editProject")}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -591,12 +616,12 @@ export default function ProjectDetailPage() {
                 {supervisorMembers.map((m) => {
                   const u = memberUsers[m.user_id];
                   return (
-                    <div key={m.user_id} className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100 mb-2">
-                      <div className="flex items-center gap-3">
+                    <div key={m.user_id} className="flex items-center justify-between p-3 bg-blue-50 rounded-xl border border-blue-100 mb-2 gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <MemberAvatar name={u?.name} color="bg-blue-200 text-blue-700" />
-                        <div>
+                        <div className="min-w-0">
                           <div className="font-semibold text-sm">{u?.name ?? `User #${m.user_id}`}</div>
-                          <div className="text-xs text-gray-400 truncate max-w-[180px]">{u?.email ?? "..."}</div>
+                          <div className="text-xs text-gray-400 truncate">{u?.email ?? "..."}</div>
                         </div>
                       </div>
                       <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-full shrink-0">Supervisor</span>
@@ -612,12 +637,12 @@ export default function ProjectDetailPage() {
                 {teamMembers.map((m) => {
                   const u = memberUsers[m.user_id];
                   return (
-                    <div key={m.user_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 mb-2">
-                      <div className="flex items-center gap-3">
+                    <div key={m.user_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 mb-2 gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
                         <MemberAvatar name={u?.name} />
-                        <div>
+                        <div className="min-w-0">
                           <div className="font-semibold text-sm">{u?.name ?? `User #${m.user_id}`}</div>
-                          <div className="text-xs text-gray-400 truncate max-w-[180px]">{u?.email ?? "..."}</div>
+                          <div className="text-xs text-gray-400 truncate">{u?.email ?? "..."}</div>
                         </div>
                       </div>
                       <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full shrink-0 ${m.role === "leader" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}>
@@ -634,13 +659,14 @@ export default function ProjectDetailPage() {
             )}
           </div>
 
+          {/* Equipment / Requisitions */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <Cpu size={17} className="text-gray-400" />
                 <h2 className="text-base font-bold">{t("projectsPage.details.equipment", { count: requisitions.length })}</h2>
               </div>
-              {isMember && ["pending", "active"].includes(project.status) && (
+              {canRequestEquipment && (
                 <button
                   onClick={() => setShowReqModal(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
@@ -655,7 +681,6 @@ export default function ProjectDetailPage() {
             ) : (
               <div className="flex flex-col gap-2">
                 {(requisitions as any[]).map((req) => {
-                  {console.log(req)}
                   const now = new Date();
                   const assetName = catalog[req.snipeit_asset_id] ?? `Asset #${req.snipeit_asset_id ?? "?"}`;
                   const requestedDate = new Date(req.created_at).toLocaleDateString("en-GB", {
@@ -699,14 +724,14 @@ export default function ProjectDetailPage() {
                   return (
                     <div
                       key={req.id}
-                      className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
+                      className="flex items-start justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="p-1.5 bg-white border border-gray-100 rounded-lg shrink-0">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="p-1.5 bg-white border border-gray-100 rounded-lg shrink-0 mt-0.5">
                           <Cpu size={13} className="text-gray-400" />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-semibold text-sm text-gray-800 truncate">{assetName}</div>
+                          <div className="font-semibold text-sm text-gray-800 break-words">{assetName}</div>
                           <div className="text-xs text-gray-400">{t("projectsPage.details.reqDate", { date: requestedDate })}</div>
                         </div>
                       </div>
@@ -720,7 +745,7 @@ export default function ProjectDetailPage() {
             )}
           </div>
         </div>
-        
+
         <div className="flex flex-col gap-5">
           {tags.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
@@ -751,9 +776,9 @@ export default function ProjectDetailPage() {
                     href={l}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm text-indigo-500 hover:text-indigo-700 hover:underline truncate flex items-center gap-1"
+                    className="text-sm text-indigo-500 hover:text-indigo-700 hover:underline break-all flex items-start gap-1"
                   >
-                    <ChevronRight size={12} className="shrink-0" />
+                    <ChevronRight size={12} className="shrink-0 mt-1" />
                     {l.replace(/^https?:\/\//, "")}
                   </a>
                 ))}
@@ -798,11 +823,32 @@ export default function ProjectDetailPage() {
         />
       )}
 
+      {showBlockedModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md rounded-[24px] p-7 shadow-xl">
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle size={22} className="text-orange-500" />
+            </div>
+            <h2 className="text-lg font-bold mb-2">Equipment not returned</h2>
+            <p className="text-gray-500 text-sm mb-6">
+              All equipment must be returned before completing the project. Please return the checked-out items and try again.
+            </p>
+            <button
+              onClick={() => setShowBlockedModal(false)}
+              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 text-sm transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Complete project modal */}
       {showCompleteModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-md rounded-[24px] p-8 shadow-xl">
+          <div className="bg-white w-full max-w-md rounded-[24px] p-7 shadow-xl">
             <h2 className="text-xl font-bold mb-2">{t("projectsPage.details.markAsCompleted")}</h2>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-500 mb-6 text-sm">
               {t("projectsPage.details.markAsCompletedConfirm", { name: project.name })}
             </p>
             <div className="flex gap-3">
@@ -822,7 +868,7 @@ export default function ProjectDetailPage() {
                     alert(err.message);
                   }
                 }}
-                className="flex-1 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors text-sm"
+                className="flex-1 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-sm"
               >
                 {t("projectsPage.details.completeProject")}
               </button>

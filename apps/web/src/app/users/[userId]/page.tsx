@@ -59,14 +59,28 @@ export default function UserDetails({ params }: { params: Promise<{ userId: stri
           usersApi.projects(id),
         ]);
         setUser(u);
-        setProjects(p);
+
+        const sortedProjects = [...p].sort((a, b) => {
+          if (a.created_at && b.created_at) {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          }
+          return b.id - a.id; 
+        });
+        setProjects(sortedProjects);
 
         const pNames: Record<number, string> = {};
         p.forEach((proj) => { pNames[proj.id] = proj.name; });
         setProjectNames(pNames);
 
         const allReqs = await requisitionsApi.list().catch(() => [] as Requisition[]);
-        const userReqs = allReqs.filter((r) => r.requested_by === id);
+        const userReqs = allReqs
+          .filter((r) => r.requested_by === id)
+          .sort((a, b) => {
+             if (a.created_at && b.created_at) {
+               return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+             }
+             return b.id - a.id;
+          });
         setReqs(userReqs);
 
         const extraPIds = [...new Set(
@@ -127,11 +141,11 @@ export default function UserDetails({ params }: { params: Promise<{ userId: stri
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-        <div className="lg:col-span-4 bg-white border border-gray-200 rounded-2xl p-8 shadow-sm flex flex-col items-center text-center h-fit">
+        <div className="lg:col-span-4 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center text-center h-fit">
           <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600 font-bold text-3xl mb-4">
             {user.name.charAt(0).toUpperCase()}
           </div>
-          <h1 className="text-xl font-bold mb-1">{user.name}</h1>
+          <h1 className="text-xl font-bold mb-1 break-words w-full">{user.name}</h1>
           <span className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border mb-5 ${
             user.role === "lab_technician" ? "bg-teal-50 text-teal-600 border-teal-200" :
             user.role === "professor"      ? "bg-purple-50 text-purple-600 border-purple-200" :
@@ -142,26 +156,26 @@ export default function UserDetails({ params }: { params: Promise<{ userId: stri
           </span>
 
           <div className="w-full text-left flex flex-col gap-2">
-            <div className="flex justify-between text-sm py-2 border-b border-gray-50">
-              <span className="text-gray-400 font-medium">{t("usersPage.email")}</span>
-              <span className="text-gray-700 font-semibold text-right truncate max-w-[60%]">{user.email}</span>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm py-2 border-b border-gray-50 gap-1 sm:gap-4">
+              <span className="text-gray-400 font-medium shrink-0">{t("usersPage.email")}</span>
+              <span className="text-gray-700 font-semibold break-all text-left sm:text-right">{user.email}</span>
             </div>
             {user.nmec && (
-              <div className="flex justify-between text-sm py-2 border-b border-gray-50">
-                <span className="text-gray-400 font-medium">{t("usersPage.nmec")}</span>
-                <span className="text-gray-700 font-semibold">{user.nmec}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm py-2 border-b border-gray-50 gap-1 sm:gap-4">
+                <span className="text-gray-400 font-medium shrink-0">{t("usersPage.nmec")}</span>
+                <span className="text-gray-700 font-semibold break-words text-left sm:text-right">{user.nmec}</span>
               </div>
             )}
             {user.course && (
-              <div className="flex justify-between text-sm py-2 border-b border-gray-50">
-                <span className="text-gray-400 font-medium">{t("usersPage.course")}</span>
-                <span className="text-gray-700 font-semibold text-right">{user.course}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm py-2 border-b border-gray-50 gap-1 sm:gap-4">
+                <span className="text-gray-400 font-medium shrink-0">{t("usersPage.course")}</span>
+                <span className="text-gray-700 font-semibold break-words text-left sm:text-right">{user.course}</span>
               </div>
             )}
             {user.academic_year && (
-              <div className="flex justify-between text-sm py-2">
-                <span className="text-gray-400 font-medium">{t("usersPage.year")}</span>
-                <span className="text-gray-700 font-semibold">{t("usersPage.yearValue", { year: user.academic_year })}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm py-2 gap-1 sm:gap-4">
+                <span className="text-gray-400 font-medium shrink-0">{t("usersPage.year")}</span>
+                <span className="text-gray-700 font-semibold break-words text-left sm:text-right">{t("usersPage.yearValue", { year: user.academic_year })}</span>
               </div>
             )}
           </div>
@@ -182,16 +196,16 @@ export default function UserDetails({ params }: { params: Promise<{ userId: stri
                   const pStyles = getStatusStyles(proj.status);
                   return (
                     <Link key={proj.id} href={`/projects/${proj.id}`}>
-                      <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer">
-                        <div className="min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer gap-3">
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-800 truncate">{proj.name}</span>
+                            <span className="font-semibold text-sm text-gray-800 break-words">{proj.name}</span>
                           </div>
-                          <div className="text-xs text-gray-400 mt-0.5">
+                          <div className="text-xs text-gray-400 mt-0.5 break-words">
                             {proj.course}
                           </div>
                         </div>
-                        <span className={`shrink-0 ml-3 flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase rounded-full ${pStyles.bg} ${pStyles.text}`}>
+                        <span className={`self-start sm:self-center shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase rounded-full ${pStyles.bg} ${pStyles.text}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${pStyles.dot}`} />
                           {proj.status}
                         </span>
@@ -242,22 +256,22 @@ export default function UserDetails({ params }: { params: Promise<{ userId: stri
                   const rStyles = getReqStatusStyles(req.status, isOverdue);
 
                   return (
-                    <div key={req.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="p-2 bg-white border border-gray-100 rounded-lg shrink-0">
+                    <div key={req.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="p-2 bg-white border border-gray-100 rounded-lg shrink-0 mt-0.5">
                           <Cpu size={14} className="text-gray-400" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="font-semibold text-sm text-gray-900 truncate">{assetName}</div>
-                          <div className="text-xs text-gray-400 truncate mt-0.5">{projectName}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-sm text-gray-900 break-words">{assetName}</div>
+                          <div className="text-xs text-gray-400 break-words mt-0.5">{projectName}</div>
                         </div>
                       </div>
 
-                      <div className="flex items-end gap-1.5 shrink-0">
-                        <span className="text-xs text-gray-400">{reqDate}</span>
-                        <span className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase rounded-full whitespace-nowrap ${rStyles.bg} ${rStyles.text}`}>
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0 w-full sm:w-auto">
+                        <span className="text-xs text-gray-400 whitespace-nowrap">{reqDate}</span>
+                        <span className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase rounded-full break-words max-w-full ${rStyles.bg} ${rStyles.text}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${rStyles.dot}`} />
-                          {statusLabel}
+                          <span className="break-words">{statusLabel}</span>
                         </span>
                       </div>
                     </div>

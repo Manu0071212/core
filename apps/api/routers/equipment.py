@@ -130,24 +130,37 @@ def get_available_catalog(
     current_user: Optional[User] = Depends(require_optional)
 ):
     from sqlmodel import select
-    from db.models import EquipmentUsage, Equipment as EquipmentModel
+    from db.models import (
+        EquipmentUsage,
+        Equipment,
+        EquipmentRequest,
+    )
 
-    # Assets que estão actualmente em uso (checked_out ou assigned)
-    active_usages = session.exec(
+    active_usage_equipment_ids = session.exec(
         select(EquipmentUsage.equipment_id)
         .where(EquipmentUsage.status.in_(["checked_out", "assigned"]))
     ).all()
 
-    # Converte para snipeit_asset_id para comparar com o catálogo
-    blocked_equipment = session.exec(
-        select(EquipmentModel.snipeit_asset_id)
-        .where(EquipmentModel.id.in_(active_usages))
-        .where(EquipmentModel.snipeit_asset_id.is_not(None))
+    pending_request_asset_ids = session.exec(
+        select(EquipmentRequest.snipeit_asset_id)
+        .where(EquipmentRequest.status == "pending")
+        .where(EquipmentRequest.snipeit_asset_id.is_not(None))
     ).all()
-    blocked_ids = set(blocked_equipment)
+
+    active_usage_asset_ids = session.exec(
+        select(Equipment.snipeit_asset_id)
+        .where(Equipment.id.in_(active_usage_equipment_ids))
+        .where(Equipment.snipeit_asset_id.is_not(None))
+    ).all()
+
+    blocked_asset_ids = (
+        set(active_usage_asset_ids) |
+        set(pending_request_asset_ids)
+    )
 
     all_catalog = list_equipment_catalog_from_snipeit(session=session)
+
     return [
         item for item in all_catalog
-        if item["available"] and item["id"] not in blocked_ids
+        if item["available"] and item["id"] not in blocked_asset_ids
     ]

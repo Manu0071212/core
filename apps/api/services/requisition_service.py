@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-RESERVED_STATUS_ID = int(os.getenv("SNIPEIT_RESERVED_STATUS_ID", "4"))
+RESERVED_STATUS_ID = int(os.getenv("SNIPEIT_RESERVED_STATUS_ID"))
 
 def _add_history(session, entity_id, old_status, new_status, changed_by, note=None):
     session.add(StatusHistory(
@@ -75,7 +75,7 @@ def approve_requisition(session: Session, req_id: int, user_id: int) -> Equipmen
         notify_project_members(
             session, req.project_id,
             title="Equipment request approved",
-            message=f'Your request for asset #{req.snipeit_asset_id} on "{project_name}" was approved.',
+            message=f'Your request for asset #{req.snipeit_asset_id} on "{project_name}" was approved. You can now pick up the equipment.',
             type="approval",
             reference_type="equipment_request",
             reference_id=req.id,
@@ -118,7 +118,13 @@ def reject_requisition(session: Session, req_id: int, user_id: int, reason: str)
     session.refresh(req)
     return req
 
-def _parse_snipeit_date(date_str: str | None):
+def _parse_snipeit_date(date_val):
+    if not date_val:
+        return datetime.now(timezone.utc)
+    if isinstance(date_val, dict):
+        date_str = date_val.get("datetime")
+    else:
+        date_str = date_val
     if not date_str:
         return datetime.now(timezone.utc)
     try:
@@ -138,9 +144,6 @@ def sync_from_snipeit_logs(session: Session) -> dict:
             params={"limit": 200}
         )
         rows = response.get("rows") or []
-        print(f"Rows received: {len(rows)}", flush=True)
-        for r in rows:
-            print(f"  row id={r.get('id')} action={r.get('action_type')} item={r.get('item')}", flush=True)
     except Exception as e:
         logger.error(f"Failed to fetch Snipe-IT activity logs: {e}")
         return stats
@@ -164,13 +167,17 @@ def sync_from_snipeit_logs(session: Session) -> dict:
                 continue
 
             if action_type == "checkout" and req.status == "reserved":
+                action_date = _parse_snipeit_date(row.get("action_date"))
+                
+                if req.created_at and action_date < req.created_at.replace(tzinfo=None):
+                    continue
+                
                 log_meta = row.get("log_meta") or {}
                 expected_raw = None
                 if "expected_checkin" in log_meta:
                     val = log_meta["expected_checkin"]
                     expected_raw = val.get("new") if isinstance(val, dict) else val
 
-                action_date = _parse_snipeit_date(row.get("action_date"))
                 req.status = "checked_out"
                 req.checked_out_at = action_date
                 if expected_raw:
@@ -185,6 +192,10 @@ def sync_from_snipeit_logs(session: Session) -> dict:
 
             elif action_type == "checkin from" and req.status == "checked_out":
                 action_date = _parse_snipeit_date(row.get("action_date"))
+
+                if req.checked_out_at and action_date < req.checked_out_at:
+                    continue
+                
                 req.status = "returned"
                 req.returned_at = action_date
                 _add_history(session, req.id, "checked_out", "returned", 1,

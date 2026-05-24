@@ -11,8 +11,7 @@ router = APIRouter(tags=["requisitions"])
 
 @router.get("/requisitions", response_model=List[RequisitionRead])
 def list_all_requisitions(
-    session: Session = Depends(get_session),
-    current_user: User = Depends(require_any)
+    session: Session = Depends(get_session)
 ):
     return req_svc.list_all_requisitions(session)
 
@@ -55,7 +54,7 @@ def create_project_requisitions(
 def approve_requisition(
     req_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_any),
+    current_user: User = Depends(require_lab_tech),
 ):
     try:
         return req_svc.approve_requisition(session, req_id, current_user.id)
@@ -67,7 +66,7 @@ def reject_requisition(
     req_id: int,
     data: RequisitionReject,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_any),
+    current_user: User = Depends(require_lab_tech),
 ):
     try:
         return req_svc.reject_requisition(session, req_id, current_user.id, data.reason)

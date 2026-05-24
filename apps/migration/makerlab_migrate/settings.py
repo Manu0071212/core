@@ -43,9 +43,11 @@ class MigrationSettings(BaseSettings):
         from dotenv import load_dotenv
         
         # Explicitly load .env file from the migration directory (parent of this file's dir)
+        # Do not override already-set environment variables, so shell exports like
+        # DATABASE_URL take precedence over the repository .env defaults.
         env_path = Path(__file__).parent.parent / ".env"
         if env_path.exists():
-            load_dotenv(env_path, override=True)
+            load_dotenv(env_path, override=False)
             print(f"Loaded .env from: {env_path}")
         
 

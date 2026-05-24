@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Search, Plus, Cpu } from "lucide-react";
 import Link from "next/link";
 import { projects as projectsApi, requisitions as reqApi, equipment as equipmentApi, auth, requisitions as requisitionsApi } from "@/lib/api";
-import type { Project, Requisition, User } from "@/lib/api";
+import type { Project, Requisition } from "@/lib/api";
 import Header from "@/app/components/header";
 import { useTranslation } from "react-i18next";
 
@@ -71,61 +71,54 @@ export default function MyProjectsPage() {
 
   return (
     <main className="flex-1 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
-      <div className="px-4 sm:px-8 py-6">
+      <div className="px-4 py-6">
         <Header />
 
-        <div className="flex justify-between items-start gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-0.5">{t("projectsPage.myProjects")}</h1>
-            <p className="text-gray-400 text-sm font-medium">{t("projectsPage.myProjectsSubtitle")}</p>
+            <h1 className="text-xl sm:text-3xl font-bold mb-0.5">{t("projectsPage.myProjects")}</h1>
+            <p className="text-gray-400 text-xs sm:text-sm font-medium">{t("projectsPage.myProjectsSubtitle")}</p>
           </div>
           <Link
             href="/projects/new"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm text-sm shrink-0"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm text-sm"
           >
             <Plus size={16} /> {t("projectsPage.newProject")}
           </Link>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="relative w-full">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-colors shadow-sm"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 focus:ring-4 focus:ring-indigo-500/10"
               placeholder={t("projectsPage.searchNamePlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide sm:pb-0 sm:flex-wrap">
-            {FILTERS.map((f) => {
-              let translationKey = "common.all";
-              if (f === "Pending") translationKey = "projectsPage.status.pending";
-              if (f === "Active") translationKey = "projectsPage.status.active";
-              if (f === "Completed") translationKey = "projectsPage.status.completed";
-              if (f === "Rejected") translationKey = "projectsPage.status.rejected";
-              
-              return (
-                <button
-                  key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
-                    activeFilter === f
-                      ? "bg-indigo-600 text-white border-indigo-600"
-                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  {f === "All" ? t("usersPage.all") : t(translationKey as any)}
-                </button>
-              );
-            })}
+          
+          <div className="flex gap-2 flex-wrap pb-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`px-5 py-2 rounded-lg text-xs font-bold whitespace-nowrap border transition-colors ${
+                  activeFilter === f
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {f === "All" ? t("usersPage.all") : t(`projectsPage.status.${f.toLowerCase()}` as any)}
+              </button>
+            ))}
           </div>
         </div>
 
         {loading ? (
           <div className="flex flex-col gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="border border-gray-200 rounded-2xl h-40 animate-pulse bg-gray-50" />
+              <div key={i} className="border border-gray-200 rounded-2xl h-32 animate-pulse bg-gray-50" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -173,10 +166,10 @@ function ProjectCard({
       <div className="border border-gray-200 rounded-[24px] overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
 
         <div className="p-6 pb-4">
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="font-bold text-gray-900 text-xl">{project.name}</h3>
-              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${sc.color}`}>
+          <div className="flex flex-col mb-3">
+            <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap sm:flex-nowrap w-full">
+              <h3 className="font-bold text-gray-900 text-xl break-words min-w-0 flex-1">{project.name}</h3>
+              <span className={`shrink-0 px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${sc.color}`}>
                 {sc.label}
               </span>
             </div>
@@ -210,7 +203,7 @@ function ProjectCard({
             <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
               {t("projectsPage.equipmentRequests", { count: requisitions.length })}
             </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {requisitions.map((req) => {
                 const assetName = req.snipeit_asset_id
                   ? (assetNames[req.snipeit_asset_id] ?? `${t("ledgerPage.asset")} #${req.snipeit_asset_id}`)
@@ -246,12 +239,12 @@ function ProjectCard({
                 }
 
                 return (
-                  <div key={req.id} className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex items-center justify-between text-sm gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Cpu size={13} className="text-gray-300 shrink-0" />
-                      <span className="text-gray-600 truncate">{assetName}</span>
+                  <div key={req.id} className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex items-start sm:items-center justify-between text-sm gap-3">
+                    <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
+                      <Cpu size={13} className="text-gray-300 shrink-0 mt-0.5 sm:mt-0" />
+                      <span className="text-gray-600 break-words">{assetName}</span>
                     </div>
-                    <span className={`shrink-0 px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full ${badgeColor}`}>
+                    <span className={`shrink-0 mt-0.5 sm:mt-0 px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full ${badgeColor}`}>
                       {statusLabel}
                     </span>
                   </div>

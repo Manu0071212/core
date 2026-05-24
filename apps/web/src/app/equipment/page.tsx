@@ -92,11 +92,11 @@ export default function EquipmentPage() {
   }, [equipment, activeStatus, activeCategory, search]);
 
   return (
-    <main className="flex-1 p-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
+    <main className="flex-1 px-3 py-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
       <Header />
 
       <div className="mb-6">
-        <h1 className="text-[32px] font-bold text-gray-900 mb-1">
+        <h1 className="text-2xl sm:text-[32px] font-bold text-gray-900 mb-1 leading-tight">
           {t("equipmentPage.title")}
         </h1>
         <p className="text-gray-500 font-medium">
@@ -104,8 +104,9 @@ export default function EquipmentPage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 mb-6 w-full">
-        <div className="relative flex-1">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-6 w-full">
+        
+        <div className="relative flex-1 w-full">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm"
@@ -115,52 +116,54 @@ export default function EquipmentPage() {
           />
         </div>
 
-        <div className="relative">
-          <button
-            onClick={() => setIsCatOpen(!isCatOpen)}
-            className="flex items-center justify-between gap-2 w-full lg:w-48 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-          >
-            <span className="truncate">
-              {activeCategory === "All Categories" ? t("equipmentPage.allCategories") : activeCategory}
-            </span>
-            <ChevronDown size={16} className={`transition-transform shrink-0 ${isCatOpen ? "rotate-180" : ""}`} />
-          </button>
-
-          {isCatOpen && (
-            <div className="absolute top-full left-0 mt-2 w-full lg:w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 py-1 max-h-60 overflow-y-auto scrollbar-hide">
-              {dynamicCategories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => { setActiveCategory(cat); setIsCatOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
-                    activeCategory === cat ? "text-indigo-600 font-bold" : "text-gray-600"
-                  }`}
-                >
-                  {cat === "All Categories" ? t("equipmentPage.allCategories") : cat}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:pb-0">
-          {statusFilters.map((opt) => (
+        <div className="flex flex-col sm:flex-row gap-4 lg:w-auto w-full">
+          <div className="relative w-full sm:w-auto shrink-0 z-10">
             <button
-              key={opt}
-              onClick={() => setActiveStatus(opt)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
-                activeStatus === opt
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              }`}
+              onClick={() => setIsCatOpen(!isCatOpen)}
+              className="flex items-center justify-between gap-2 w-full lg:w-48 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
             >
-              {opt === "All" ? t("equipmentPage.all") : 
-               opt === "Available" ? t("equipmentPage.available", "Available") : 
-               opt === "Reserved" ? t("equipmentPage.reserved", "Reserved") : 
-               opt === "Checked Out" ? t("equipmentPage.checkedOut", "Checked Out") : 
-               t("equipmentPage.maintenance", "Maintenance")}
+              <span className="truncate">
+                {activeCategory === "All Categories" ? t("equipmentPage.allCategories") : activeCategory}
+              </span>
+              <ChevronDown size={16} className={`transition-transform shrink-0 text-gray-400 ${isCatOpen ? "rotate-180" : ""}`} />
             </button>
-          ))}
+
+            {isCatOpen && (
+              <div className="absolute top-full left-0 mt-2 w-full lg:w-56 bg-white border border-gray-200 rounded-2xl shadow-xl py-1 max-h-60 overflow-y-auto scrollbar-hide">
+                {dynamicCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => { setActiveCategory(cat); setIsCatOpen(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                      activeCategory === cat ? "text-indigo-600 font-bold" : "text-gray-600"
+                    }`}
+                  >
+                    {cat === "All Categories" ? t("equipmentPage.allCategories") : cat}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2 w-full">
+            {statusFilters.map((opt) => (
+              <button
+                key={opt}
+                onClick={() => setActiveStatus(opt)}
+                className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
+                  activeStatus === opt
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {opt === "All" ? t("equipmentPage.all") : 
+                 opt === "Available" ? t("equipmentPage.available", "Available") : 
+                 opt === "Reserved" ? t("equipmentPage.reserved", "Reserved") : 
+                 opt === "Checked Out" ? t("equipmentPage.checkedOut", "Checked Out") : 
+                 t("equipmentPage.maintenance", "Maintenance")}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -196,43 +199,62 @@ export default function EquipmentPage() {
                 <Link
                   key={item.id}
                   href={`/equipment/${item.id}`}
-                  className="group flex items-center justify-between bg-white border border-transparent hover:border-indigo-100 rounded-2xl p-4 transition-all shadow-sm hover:shadow-md"
+                  className="group flex items-start sm:items-center justify-between bg-white border border-transparent hover:border-indigo-100 rounded-2xl p-4 sm:px-5 sm:py-4 transition-all shadow-sm hover:shadow-md"
                 >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-14 h-14 bg-gray-50 flex items-center justify-center rounded-xl border border-gray-100 overflow-hidden shrink-0 group-hover:bg-white transition-colors">
+                  <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-50 flex items-center justify-center rounded-xl border border-gray-100 overflow-hidden shrink-0 group-hover:bg-white transition-colors mt-0.5 sm:mt-0">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
                         <Package size={24} className="text-gray-300" />
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-gray-900 text-base truncate">
+                    
+                    <div className="flex flex-col gap-1.5 sm:gap-0.5 min-w-0 flex-1">
+                      <div className="flex items-start sm:items-center gap-2 min-w-0">
+                        <h3 className="font-bold text-gray-900 text-base break-words min-w-0">
                           {item.name}
                         </h3>
                         {item.category && (
-                          <span className="px-2 py-0.5 bg-gray-100 border border-gray-200 text-gray-500 text-[10px] font-bold rounded-lg uppercase">
+                          <span className="hidden sm:inline-block px-2.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-500 text-[10px] font-bold rounded-lg uppercase shrink-0 mt-1 sm:mt-0">
                             {item.category}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-400 mt-0.5 font-medium flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-200" />
-                        <span className="truncate">{item.location ?? t("equipmentPage.unknownLocation")}</span>
-                      </p>
+
+                      <div className="flex sm:hidden">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.bg}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                          <span>{t(`equipmentPage.${badge.labelKey}`)}</span>
+                        </span>
+                      </div>
+
+                      {item.category && (
+                        <div className="flex sm:hidden min-w-0">
+                          <span className="text-[11px] font-bold text-gray-500 uppercase break-words min-w-0">
+                            {item.category}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="text-sm text-gray-400 font-medium flex items-start gap-1.5 min-w-0 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-200 shrink-0 mt-1.5" />
+                        <span className="break-words min-w-0">{item.location ?? t("equipmentPage.unknownLocation")}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0 ml-2 h-full self-center">
                     {item.price != null && (
                       <div className="hidden sm:block text-sm font-bold text-gray-900 mr-2">€{item.price}</div>
                     )}
-                    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.bg}`}>
+                    
+                    <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.bg}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                       <span className="inline-block">{t(`equipmentPage.${badge.labelKey}`)}</span>
                     </span>
-                    <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-indigo-50 transition-colors">
+                    
+                    <div className="flex p-2 bg-gray-50 rounded-lg group-hover:bg-indigo-50 transition-colors">
                       <ChevronRight size={18} className="text-gray-300 group-hover:text-indigo-500 transition-colors" />
                     </div>
                   </div>

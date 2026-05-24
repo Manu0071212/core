@@ -1,5 +1,5 @@
 "use client";
- 
+
 // apps/web/src/app/projects/new/page.tsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -19,12 +19,12 @@ import {
   type EquipmentCatalogItem,
 } from "@/lib/api";
 import { useTranslation } from "react-i18next";
- 
+
 const MEMBER_ROLES = ["member", "observer", "advisor"];
- 
+
 interface MemberEntry { user: User; role: string; }
 interface EquipmentEntry { model: EquipmentCatalogItem; }
- 
+
 function PeoplePicker({
   label, placeholder, users, onAdd, accent = "indigo",
 }: {
@@ -40,7 +40,7 @@ function PeoplePicker({
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
   );
- 
+
   return (
     <div>
       <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">{label}</p>
@@ -56,7 +56,7 @@ function PeoplePicker({
       {search && (
         <div className="flex flex-col gap-1 max-h-44 overflow-y-auto border border-gray-100 rounded-xl bg-white shadow-sm">
           {filtered.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-3">{placeholder === "Search available equipment..." ? "No results." : "No results." /* this will be replaced by common.noResults later if needed, but the search uses noResults anyway */}</p>
+            <p className="text-xs text-gray-400 text-center py-3">{placeholder === "Search available equipment..." ? "No results." : "No results."}</p>
           ) : filtered.map((u) => (
             <button
               key={u.id}
@@ -78,18 +78,18 @@ function PeoplePicker({
     </div>
   );
 }
- 
+
 export default function NewProjectPage() {
   const router = useRouter();
   const { t } = useTranslation();
- 
+
   const [currentUser, setCurrentUser]     = useState<User | null>(null);
   const [supervisors, setSupervisors]     = useState<User[]>([]);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [catalog, setCatalog]             = useState<EquipmentCatalogItem[]>([]);
   const [submitting, setSubmitting]       = useState(false);
   const [error, setError]                 = useState<string | null>(null);
- 
+
   const [name, setName]               = useState("");
   const [course, setCourse]           = useState("");
   const [academicYear, setAcademicYear] = useState("");
@@ -102,7 +102,7 @@ export default function NewProjectPage() {
   const [members, setMembers]         = useState<MemberEntry[]>([]);
   const [equipmentItems, setEquipmentItems] = useState<EquipmentEntry[]>([]);
   const [equipSearch, setEquipSearch] = useState("");
- 
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -129,43 +129,40 @@ export default function NewProjectPage() {
     load();
     return () => { cancelled = true; };
   }, [router]);
- 
+
   const addTag = () => {
     const t = tagInput.trim();
     if (t && !tags.includes(t)) setTags([...tags, t]);
     setTagInput("");
   };
- 
+
   const addLink = () => {
     const l = linkInput.trim();
     if (l && !links.includes(l)) setLinks([...links, l]);
     setLinkInput("");
   };
- 
+
   const addSupervisor = (user: User) => {
     if (members.find((m) => m.user.id === user.id)) return;
     setMembers([...members, { user, role: "supervisor" }]);
   };
- 
+
   const addMember = (user: User) => {
     if (members.find((m) => m.user.id === user.id)) return;
     setMembers([...members, { user, role: "member" }]);
   };
- 
+
   const updateMemberRole = (userId: number, role: string) =>
     setMembers(members.map((m) => (m.user.id === userId ? { ...m, role } : m)));
- 
+
   const addEquipment = (model: EquipmentCatalogItem) => {
     if (equipmentItems.find((e) => e.model.id === model.id)) return;
     setEquipmentItems([...equipmentItems, { model }]);
     setEquipSearch("");
   };
- 
+
   const handleSubmit = async () => {
     if (!name.trim()) { setError("Project name is required."); return; }
-    if (!members.some((m) => m.role === "supervisor")) {
-      setError("Please add at least one supervisor."); return;
-    }
     setSubmitting(true);
     setError(null);
     try {
@@ -188,35 +185,35 @@ export default function NewProjectPage() {
       setSubmitting(false);
     }
   };
- 
+
   const inputClass =
     "w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-gray-400 placeholder:font-normal";
- 
+
   const supervisorList  = members.filter((m) => m.role === "supervisor");
   const memberList      = members.filter((m) => m.role !== "supervisor");
   const filteredEquip   = catalog
     .filter((m) => !equipmentItems.find((e) => e.model.id === m.id))
     .filter((m) => !equipSearch || m.name.toLowerCase().includes(equipSearch.toLowerCase()));
- 
+
   return (
     <main className="flex-1 bg-[#f4f5f7] px-4 sm:px-8 py-6 min-h-screen font-sans text-gray-900">
       <Header />
-      <div className="w-full max-w-5xl mx-auto pb-12">
- 
+      <div className="w-full pb-12">
+
         <Link
           href="/projects"
           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 mb-6 text-sm font-semibold text-gray-600 shadow-sm transition-colors"
         >
           <ArrowLeft size={15} /> {t("projectsPage.new.back")}
         </Link>
- 
+
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-1">{t("projectsPage.new.title")}</h1>
           <p className="text-gray-500 text-sm">{t("projectsPage.new.subtitle")}</p>
         </div>
- 
+
         <div className="flex flex-col gap-5">
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><FileText size={17} /></div>
@@ -247,13 +244,13 @@ export default function NewProjectPage() {
               </div>
             </div>
           </section>
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><ShieldCheck size={17} /></div>
               <h2 className="font-bold text-gray-900">{t("projectsPage.new.supervisors")} <span className="text-red-400">*</span></h2>
             </div>
- 
+
             {supervisorList.length > 0 && (
               <div className="flex flex-col gap-2 mb-4">
                 {supervisorList.map((m) => (
@@ -277,7 +274,7 @@ export default function NewProjectPage() {
                 ))}
               </div>
             )}
- 
+
             <PeoplePicker
               label={t("projectsPage.new.addSupervisor")}
               placeholder={t("projectsPage.new.searchSupervisorPlaceholder")}
@@ -286,13 +283,13 @@ export default function NewProjectPage() {
               accent="amber"
             />
           </section>
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-teal-50 text-teal-600 rounded-lg"><Users size={17} /></div>
               <h2 className="font-bold text-gray-900">{t("projectsPage.new.teamMembers")}</h2>
             </div>
- 
+
             <div className="flex flex-col gap-2 mb-4">
               {currentUser && (
                 <div className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
@@ -310,7 +307,7 @@ export default function NewProjectPage() {
                   <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded-full shrink-0">{t("projectsPage.new.leader")}</span>
                 </div>
               )}
- 
+
               {memberList.map((m) => (
                 <div key={m.user.id} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -342,7 +339,7 @@ export default function NewProjectPage() {
                 </div>
               ))}
             </div>
- 
+
             <PeoplePicker
               label={t("projectsPage.new.addMember")}
               placeholder={t("projectsPage.new.searchMemberPlaceholder")}
@@ -351,26 +348,26 @@ export default function NewProjectPage() {
               accent="teal"
             />
           </section>
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><Cpu size={17} /></div>
               <h2 className="font-bold text-gray-900">{t("projectsPage.new.equipmentRequest")}</h2>
               <span className="text-xs text-gray-400 font-medium ml-1">{t("projectsPage.new.optional")}</span>
             </div>
- 
+
             {equipmentItems.length > 0 && (
               <div className="flex flex-col gap-2 mb-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("projectsPage.new.selected", { count: equipmentItems.length })}</p>
                 {equipmentItems.map((e) => (
                   <div key={e.model.id} className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="p-1.5 bg-white rounded-lg border border-emerald-100 shrink-0">
                         <Cpu size={13} className="text-emerald-500" />
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{e.model.name}</div>
-                        <div className="text-xs text-gray-400">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-gray-800 break-words">{e.model.name}</div>
+                        <div className="text-xs text-gray-400 break-words mt-0.5">
                           {e.model.asset_tag ? `${e.model.asset_tag} · ` : ""}
                           {e.model.location ?? t("projectsPage.new.noLocation")}
                         </div>
@@ -386,7 +383,7 @@ export default function NewProjectPage() {
                 ))}
               </div>
             )}
- 
+
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">{t("projectsPage.new.addEquipment")}</p>
               <div className="relative mb-2">
@@ -398,7 +395,7 @@ export default function NewProjectPage() {
                   onChange={(e) => setEquipSearch(e.target.value)}
                 />
               </div>
- 
+
               {equipSearch && (
                 <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto border border-gray-100 rounded-xl bg-white shadow-sm">
                   {filteredEquip.length === 0 ? (
@@ -413,8 +410,8 @@ export default function NewProjectPage() {
                         <Cpu size={13} className="text-gray-400" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{m.name}</div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-sm font-semibold text-gray-800 break-words">{m.name}</div>
+                        <div className="text-xs text-gray-400 break-words mt-0.5">
                           {m.asset_tag ? `${m.asset_tag} · ` : ""}
                           {m.location ?? t("projectsPage.new.noLocation")}
                         </div>
@@ -424,7 +421,7 @@ export default function NewProjectPage() {
                   ))}
                 </div>
               )}
- 
+
               {catalog.length === 0 && (
                 <p className="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-xl border border-gray-100">
                   {t("projectsPage.new.noEquipmentAvailable")}
@@ -432,7 +429,7 @@ export default function NewProjectPage() {
               )}
             </div>
           </section>
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Tag size={17} /></div>
@@ -446,7 +443,7 @@ export default function NewProjectPage() {
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
               />
-              <button onClick={addTag} className="px-4 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-700 transition-colors">
+              <button onClick={addTag} className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-gray-700 transition-colors">
                 <Plus size={16} />
               </button>
             </div>
@@ -463,7 +460,7 @@ export default function NewProjectPage() {
               </div>
             )}
           </section>
- 
+
           <section className="bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><LinkIcon size={17} /></div>
@@ -477,7 +474,7 @@ export default function NewProjectPage() {
                 onChange={(e) => setLinkInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLink())}
               />
-              <button onClick={addLink} className="px-4 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-700 transition-colors">
+              <button onClick={addLink} className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-gray-700 transition-colors">
                 <Plus size={16} />
               </button>
             </div>
@@ -496,13 +493,13 @@ export default function NewProjectPage() {
               </div>
             )}
           </section>
- 
+
           {error && (
             <div className="px-5 py-3.5 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl">
               {error}
             </div>
           )}
- 
+
           <div className="flex flex-col sm:flex-row gap-3 justify-end">
             <Link
               href="/projects"

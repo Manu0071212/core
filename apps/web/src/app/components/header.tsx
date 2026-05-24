@@ -2,7 +2,7 @@
 
 // apps/web/src/app/components/header.tsx
 import { useEffect, useState, useRef } from "react";
-import { Bell, UserCircle, Check, Globe, LogOut, ChevronDown } from "lucide-react";
+import { Bell, Check, Globe, LogOut, ChevronDown } from "lucide-react";
 import { auth, notifications as notificationsApi, equipment as equipmentApi } from "@/lib/api";
 import type { User, Notification } from "@/lib/api";
 import { useTranslation } from "react-i18next";
@@ -27,7 +27,6 @@ export default function Header() {
         const ns = await notificationsApi.list().catch(() => [] as Notification[]);
         setNotifs(ns);
 
-        // Resolve asset names for notifications with equipment reference
         const assetIds = [...new Set(
           ns
             .filter((n) => n.reference_type === "equipment_request" && n.reference_id != null)
@@ -38,14 +37,13 @@ export default function Header() {
           await Promise.allSettled(
             assetIds.map(async (id) => {
               try {
-                // get the requisition to find the snipeit_asset_id
                 const req = await fetch(`/new/api/requisitions/${id}`, {
                   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
                 }).then((r) => r.json());
                 if (req?.snipeit_asset_id) {
                   const asset = await equipmentApi.get(req.snipeit_asset_id);
-                  names[id] = asset.name ?? `Asset #${req.snipeit_asset_id}`;
-                  console.log(asset);
+                  names[id] = asset.name ? asset.name : `Asset #${req.snipeit_asset_id}`;
+                  console.log(asset.name ? asset.name : `Asset #${req.snipeit_asset_id}`);
                 }
               } catch {
                 // keep as is
@@ -59,7 +57,6 @@ export default function Header() {
       .finally(() => setLoaded(true));
   }, []);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
@@ -108,8 +105,7 @@ export default function Header() {
   const currentLang = (i18n.language ?? "en").substring(0, 2);
 
   return (
-    <div className="flex justify-end items-center gap-2 mb-6">
-      {/* Language switcher */}
+    <div className="hidden lg:flex justify-end items-center gap-2 mb-6">
       <div className="relative" ref={langRef}>
         <button
           onClick={() => setLangOpen((v) => !v)}
@@ -149,7 +145,6 @@ export default function Header() {
 
       {user ? (
         <>
-          {/* Notifications bell */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setNotifOpen((v) => !v)}
@@ -161,7 +156,7 @@ export default function Header() {
             >
               <Bell size={17} />
               {unread > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-0 right-0 w-4 h-4 bg-indigo-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {unread > 9 ? "9+" : unread}
                 </span>
               )}
@@ -197,7 +192,7 @@ export default function Header() {
                     const s = getStyle(n);
                     let message = n.message;
                     if (n.reference_type === "equipment_request" && n.reference_id && assetNames[n.reference_id]) {
-                      message = message.replace(/Asset #\d+/g, assetNames[n.reference_id]);
+                      message = message.replace(/asset #\d+/g, assetNames[n.reference_id]);
                     }
                     return (
                       <button
@@ -209,7 +204,7 @@ export default function Header() {
                           <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${s.dot}`} />
                         )}
                         <div className={`text-xs font-bold mb-0.5 pr-5 ${s.title}`}>{n.title}</div>
-                        <div className="text-xs text-gray-500 leading-relaxed pr-5 line-clamp-2">{message}</div>
+                        <div className="text-xs text-gray-500 leading-relaxed pr-5 break-words whitespace-normal">{message}</div>
                         <div className="text-[10px] text-gray-400 mt-1.5">
                           {new Date(n.created_at).toLocaleDateString("pt-PT", {
                             day: "numeric", month: "short",
@@ -224,7 +219,6 @@ export default function Header() {
             )}
           </div>
 
-          {/* User avatar */}
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen((v) => !v)}

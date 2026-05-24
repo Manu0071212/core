@@ -104,67 +104,68 @@ export default function LedgerPage() {
   }, [events, search]);
 
   return (
-    <main className="flex-1 p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
+    <main className="flex-1 p-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
       <Header />
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-1 text-gray-900">{t("ledgerPage.title")}</h1>
-        <p className="text-gray-500 text-sm">{t("ledgerPage.subtitle")}</p>
+        <h1 className="text-2xl sm:text-[32px] font-bold mb-1 text-gray-900">{t("ledgerPage.title")}</h1>
+        <p className="text-gray-500 text-sm font-medium">{t("ledgerPage.subtitle")}</p>
       </div>
 
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input
           type="text"
           placeholder={t("ledgerPage.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all duration-300"
+          className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 shadow-sm transition-all"
         />
       </div>
 
       {loading ? (
-        <div className="text-gray-400 animate-pulse">{t("ledgerPage.loading")}</div>
+        <div className="space-y-4">
+           {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />)}
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
+        <div className="text-center py-20 text-gray-400 font-medium">
           {search ? t("ledgerPage.noResults") : t("ledgerPage.noEvents")}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {filtered.map((evt) => {
             const isCheckout = evt.type === "checkout";
             return (
-              <div key={evt.key} className="group bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5 transition-all duration-300">
-                <div className="flex flex-col items-center shrink-0 self-stretch">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:bg-indigo-100 group-hover:scale-110 transition-all duration-300">
-                    <Link2 size={18} strokeWidth={2.5} />
-                  </div>
-                  <div className="w-px flex-1 bg-gray-200 mt-2 min-h-[16px] group-hover:bg-indigo-100 transition-colors duration-300" />
+              <div key={evt.key} className="group bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 flex items-start sm:items-center gap-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                  <Link2 size={18} strokeWidth={2.5} />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1.5">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${
-                      isCheckout ? "bg-amber-100/60 text-amber-700" : "bg-emerald-100/60 text-emerald-700"
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                    <span className={`self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                      isCheckout ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${isCheckout ? "bg-amber-500" : "bg-emerald-500"}`} />
                       {isCheckout ? t("ledgerPage.checkout") : t("ledgerPage.return")}
                     </span>
-                    <span className="text-[16px] font-bold text-gray-900 truncate group-hover:text-indigo-900 transition-colors duration-300">{evt.assetName}</span>
+                    <span className="text-sm font-bold text-gray-900 break-words line-clamp-2 sm:line-clamp-1">{evt.assetName}</span>
                   </div>
-                  <div className="flex items-center text-[14px] text-gray-500">
-                    <span className="group-hover:text-gray-700 transition-colors duration-300">{evt.userName}</span>
-                    <ArrowRight size={14} className="mx-2 text-gray-400 shrink-0 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all duration-300" />
-                    <span className="group-hover:text-gray-700 transition-colors duration-300">{evt.projectName}</span>
+                  
+                  <div className="flex items-center text-[13px] text-gray-400 font-medium mt-1">
+                    <span className="truncate">{evt.userName}</span>
+                    <ArrowRight size={12} className="mx-1.5 shrink-0" />
+                    <span className="truncate">{evt.projectName}</span>
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <div className="text-[14px] text-gray-500 font-medium group-hover:text-gray-700 transition-colors duration-300">
-                    {new Date(evt.date).toLocaleString("en-US", {
-                      month: "short", day: "numeric", year: "numeric",
-                      hour: "2-digit", minute: "2-digit", hour12: false,
-                    })}
+                {/* Data */}
+                <div className="text-right shrink-0 self-center">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase">
+                    {new Date(evt.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </div>
+                  <div className="text-[12px] text-gray-500 font-medium">
+                    {new Date(evt.date).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
               </div>

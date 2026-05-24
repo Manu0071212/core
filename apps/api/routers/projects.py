@@ -43,7 +43,7 @@ def get_project(
 def create_project(
     data: ProjectCreate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_user)
+    current_user: User = Depends(require_any)
 ):
     try:
         return proj_svc.create_project(session, data.dict(), current_user.id)
@@ -55,7 +55,7 @@ def update_project(
     project_id: int,
     data: ProjectUpdate,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_user)
+    current_user: User = Depends(require_any)
 ):
     try:
         return proj_svc.update_project(session, project_id, data.model_dump(exclude_none=True), current_user.id)
@@ -67,7 +67,7 @@ def add_member(
     project_id: int,
     data: ProjectMemberAdd,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_user)
+    current_user: User = Depends(require_any)
 ):
     try:
         proj_svc.add_member(session, project_id, data.user_id, current_user.id)
@@ -83,7 +83,7 @@ def remove_member(
     project_id: int,
     user_id: int,
     session: Session = Depends(get_session),
-    current_user: User = Depends(require_user)
+    current_user: User = Depends(require_any)
 ):
     try:
         proj_svc.remove_member(session, project_id, user_id, current_user.id)

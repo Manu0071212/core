@@ -213,11 +213,6 @@ export default function EquipmentDetailsPage() {
                 return (
                   <div key={`${evt.type}-${evt.req_id}`}
                     className="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      isCheckout ? "bg-orange-50 text-orange-500" : "bg-green-50 text-green-600"
-                    }`}>
-                      {isCheckout ? <LogOut size={14} /> : <LogIn size={14} />}
-                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${

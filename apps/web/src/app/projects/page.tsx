@@ -4,12 +4,12 @@
 import { useEffect, useState } from "react";
 import { Search, BookOpen, Plus, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { projects as projectsApi } from "@/lib/api";
+import { projects as projectsApi, auth } from "@/lib/api";
 import type { Project } from "@/lib/api";
 import Header from "@/app/components/header";
 import { useTranslation } from "react-i18next";
 
-const STATUS_FILTERS = ["All", "Pending", "Active", "Completed", "Rejected"];
+const STATUS_FILTERS = ["All", "Pending", "Active", "Completed"];
 
 function getStatusStyles(status: string) {
   const s = status.toLowerCase();
@@ -22,14 +22,24 @@ function getStatusStyles(status: string) {
 
 export default function ProjectsPage() {
   const { t } = useTranslation();
-  const [projectList, setProjectList] = useState<Project[]>([]);
-  const [loading, setLoading]         = useState(true);
+  const [projectList, setProjectList]   = useState<Project[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery]   = useState("");
+  const [isLoggedIn, setIsLoggedIn]     = useState(false);
 
   useEffect(() => {
-    projectsApi.list()
-      .then(setProjectList)
+    Promise.allSettled([
+      projectsApi.list(),
+      auth.me(),
+    ])
+      .then(([projectsRes, meRes]) => {
+        if (projectsRes.status === "fulfilled") {
+          setProjectList(projectsRes.value);
+        }
+
+        setIsLoggedIn(meRes.status === "fulfilled");
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -46,39 +56,46 @@ export default function ProjectsPage() {
   });
 
   return (
-    <main className="flex-1 bg-[#f4f5f7] p-4 sm:p-8 min-h-screen font-sans text-gray-900">
+    <main className="flex-1 px-3 py-4 sm:p-8 bg-[#f4f5f7] min-h-screen font-sans text-gray-900">
         <Header />
 
-        <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
           <div>
-            <h1 className="text-[32px] font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl sm:text-[32px] font-bold text-gray-900 mb-1 leading-tight">
               {t("projectsPage.title")}
             </h1>
             <p className="text-gray-500 font-medium">
               {t("projectsPage.count", { count: projectList.length })}
             </p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Link
-              href="/projects/my-projects"
-              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <BookOpen size={15} />
-              <span>{t("projectsPage.myProjects")}</span>
-            </Link>
-            <Link
-              href="/projects/new"
-              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm"
-            >
-              <Plus size={16} />
-              <span>{t("projectsPage.newProject")}</span>
-            </Link>
-          </div>
+          {isLoggedIn && (
+            <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+              <Link
+                href="/projects/my-projects"
+                className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm h-auto min-h-[44px]"
+              >
+                <BookOpen size={15} className="shrink-0" />
+                <span className="whitespace-normal text-center leading-tight">
+                  {t("projectsPage.myProjects")}
+                </span>
+              </Link>
+
+              <Link
+                href="/projects/new"
+                className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm h-auto min-h-[44px]"
+              >
+                <Plus size={16} className="shrink-0" />
+                <span className="whitespace-normal text-center leading-tight">
+                  {t("projectsPage.newProject")}
+                </span>
+              </Link>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 mb-6 w-full">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-6 w-full">
           
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 placeholder:text-gray-400 transition-all shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
@@ -88,7 +105,7 @@ export default function ProjectsPage() {
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:pb-0">
+          <div className="flex flex-wrap gap-2">
             {STATUS_FILTERS.map((option) => {
               const label = option === "All"
                 ? t("equipmentPage.all")
@@ -97,7 +114,7 @@ export default function ProjectsPage() {
                 <button
                   key={option}
                   onClick={() => setActiveFilter(option)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
+                  className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
                     activeFilter === option
                       ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
@@ -139,40 +156,51 @@ export default function ProjectsPage() {
                 <Link
                   key={proj.id}
                   href={`/projects/${proj.id}`}
-                  className="group bg-white border border-transparent hover:border-indigo-100 rounded-2xl px-5 py-4 flex items-center justify-between gap-4 transition-all shadow-sm hover:shadow-md"
+                  className="group bg-white border border-transparent hover:border-indigo-100 rounded-2xl p-4 sm:px-5 sm:py-4 flex flex-row items-center justify-between gap-3 sm:gap-4 transition-all shadow-sm hover:shadow-md"
                 >
-                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-gray-900 text-base truncate">
+                  <div className="flex flex-col gap-2 flex-1 min-w-0">
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      {/* Removido o truncate/line-clamp. Adicionado break-words e whitespace-normal */}
+                      <h3 className="font-bold text-gray-900 text-base break-words whitespace-normal leading-tight">
                         {proj.name}
                       </h3>
                       {proj.course && (
-                        <span className="px-2.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-500 text-[10px] font-bold uppercase rounded-lg">
+                        <span className="hidden sm:inline-block px-2.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-500 text-[10px] font-bold uppercase rounded-lg shrink-0">
                           {proj.course}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-400 line-clamp-1">
-                      {proj.description ?? t("projectsPage.noDescription")}
-                    </p>
-                    
-                    <div className="flex items-center gap-2 mt-1 sm:hidden">
-                       {proj.group_number && (
-                        <span className="text-[10px] font-bold text-gray-400 uppercase">
-                           Gr. {proj.group_number}
+
+                    <div className="flex sm:hidden flex-wrap items-center gap-2">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${styles.bg} ${styles.text}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${styles.dot}`} />
+                        <span>
+                          {t(`statistics.status.${statusDisplay.toLowerCase()}`, statusDisplay)}
+                        </span>
+                      </span>
+                      {proj.course && (
+                        <span className="text-[11px] font-bold text-gray-500 uppercase">
+                          {proj.course}
                         </span>
                       )}
                     </div>
+
+                    {/* Removido o truncate/line-clamp. Adicionado break-words e whitespace-normal */}
+                    <p className="text-sm text-gray-400 break-words whitespace-normal mt-0.5">
+                      {proj.description ?? t("projectsPage.noDescription")}
+                    </p>
+
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${styles.bg} ${styles.text}`}>
+                  <div className="flex items-center gap-3 shrink-0 ml-1">
+                    <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${styles.bg} ${styles.text}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${styles.dot}`} />
                       <span>
                         {t(`statistics.status.${statusDisplay.toLowerCase()}`, statusDisplay)}
                       </span>
                     </span>
-                    <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-indigo-50 transition-colors">
+                    <div className="flex p-2 bg-gray-50 rounded-lg group-hover:bg-indigo-50 transition-colors shrink-0">
                       <ChevronRight size={18} className="text-gray-300 group-hover:text-indigo-500 transition-colors" />
                     </div>
                   </div>

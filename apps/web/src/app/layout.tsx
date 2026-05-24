@@ -30,7 +30,7 @@ export default function RootLayout({
         <I18nProvider>
           <div className="flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 bg-zinc-100 p-10">
+            <main className="flex-1 bg-zinc-100 px-3 py-14 sm:p-6 lg:p-10">
               {children}
             </main>
           </div>

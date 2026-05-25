@@ -405,12 +405,11 @@ docker compose -f infra/docker/docker-compose.yml up -d
 
 ```
 127.0.0.1  deti-makerlab.ua.pt
-127.0.0.1  inventory.deti-makerlab.ua.pt
 ```
 
 3. Access via:
-   - `https://deti-makerlab.ua.pt` — main site
-   - `https://inventory.deti-makerlab.ua.pt` — Snipe-IT inventory
+   - `https://deti-makerlab.ua.pt/new` — main site
+   - `https://deti-makerlab.ua.pt/new/snipe-it` — Snipe-IT inventory
 
 > You'll see a certificate warning for self-signed SSL — click "Advanced" and continue anyway.
 
@@ -621,7 +620,7 @@ To keep the environment predictable for everyone:
 
 ### Site can't be reached — `DNS_PROBE_FINISHED_NXDOMAIN`
 
-If you're trying to access `https://deti-makerlab.ua.pt` or `https://inventory.deti-makerlab.ua.pt` but get "This site can't be reached", you need to add the domain names to your Windows **hosts file**.
+If you're trying to access `https://deti-makerlab.ua.pt/new` or `https://deti-makerlab.ua.pt/new/snipe-it` but get "This site can't be reached", you need to add the domain names to your Windows **hosts file**.
 
 **Why?** The containers are running in Docker Desktop (which uses WSL2), and nginx is configured to serve the site via domain names with HTTPS. Your Windows browser needs to know where to find these domains.
 
@@ -631,7 +630,7 @@ If you're trying to access `https://deti-makerlab.ua.pt` or `https://inventory.d
 2. Run:
 
 ```powershell
-Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "`n127.0.0.1  deti-makerlab.ua.pt`n127.0.0.1  inventory.deti-makerlab.ua.pt" -Force
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "`n127.0.0.1  deti-makerlab.ua.pt`" -Force
 ```
 
 3. Flush the DNS cache:
@@ -641,8 +640,8 @@ ipconfig /flushdns
 ```
 
 4. Close and reopen your browser, then try:
-   - `https://deti-makerlab.ua.pt`
-   - `https://inventory.deti-makerlab.ua.pt`
+   - `https://deti-makerlab.ua.pt/new`
+   - `https://deti-makerlab.ua.pt/new/snipe-it`
 
 You'll see a certificate warning (self-signed SSL) — click "Advanced" and continue anyway.
 

@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-RESERVED_STATUS_ID = int(os.getenv("SNIPEIT_RESERVED_STATUS_ID"))
+RESERVED_STATUS_ID = int(os.getenv("SNIPEIT_RESERVED_STATUS_ID", "4"))
 
 def _add_history(session, entity_id, old_status, new_status, changed_by, note=None):
     session.add(StatusHistory(

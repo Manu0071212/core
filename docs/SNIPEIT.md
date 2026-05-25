@@ -12,7 +12,7 @@ SNIPEIT_BASE_URL=http://snipeit
 SNIPEIT_API_TOKEN=your_generated_token_here
 ```
 
-*Note: Inside docker-compose, `http://snipeit` is the internal service name. External testing from a local Python script might require `https://inventory.deti-makerlab.ua.pt` with SSL verification disabled.*
+*Note: Inside docker-compose, `http://snipeit` is the internal service name. External testing from a local Python script might require `https://deti-makerlab.ua.pt/new/snipe-it` with SSL verification disabled.*
 
 ---
 
@@ -21,7 +21,7 @@ SNIPEIT_API_TOKEN=your_generated_token_here
 If you are setting up Snipe-IT for the first time, or if your token expires/gets revoked, follow these steps to generate a new one:
 
 1. **Login to Snipe-IT**
-   Navigate to your Snipe-IT dashboard (e.g., `https://inventory.deti-makerlab.ua.pt/`) and log in with an Administrator account.
+   Navigate to your Snipe-IT dashboard (e.g., `https://deti-makerlab.ua.pt/new/snipe-it`) and log in with an Administrator account.
 
 2. **Access Profile Settings**
    Click on your profile name / avatar in the **top-right corner** of the screen.

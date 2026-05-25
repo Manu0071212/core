@@ -352,7 +352,7 @@ Check running containers:
 docker ps
 ```
 
-The database tables and seeds are automatically applied by the initialization scripts found in `infra/db/init/` when the Postgres container starts for the first time.
+The database schema is automatically applied by `schema.sql` found in `infra/db/init/` when the Postgres container starts for the first time. To load the seed test data, run the seed command (see [Section 10](#10-database-initialization)).
 
 ---
 
@@ -429,17 +429,21 @@ This starts both the API and the mobile app in parallel (as configured in `turbo
 
 ## 10. Database initialization
 
-Database tables are managed directly by SQLModel. 
+Database tables are defined in `infra/db/init/schema.sql`, which is automatically applied when the Postgres container starts for the first time.
 
-When you spin up the Docker Compose stack, initialization files in `infra/db/init/` (`schema.sql` and `seed.sql`) are automatically applied.
+If you want to populate the database with sample test data (seeds), run the following command from the repository root:
 
-If you ever need to reset the database entirely, you can remove the volume and restart Docker:
+```bash
+docker compose -f infra/docker/docker-compose.yml exec -T postgres psql -U makerlab -d makerlab < infra/db/init/seed.sql
+```
+
+If you ever need to reset the database entirely (both schema and data), you can remove the volume and restart Docker:
 
 ```bash
 docker compose -f infra/docker/docker-compose.yml down -v
 docker compose -f infra/docker/docker-compose.yml up -d
 ```
-*(Warning: this will delete all local test data).*
+*(Warning: this will delete all local data, and you will need to re-run the seed command if you want the sample data).*
 
 ---
 

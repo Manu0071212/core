@@ -16,7 +16,7 @@ This plan defines a Python-based, idempotent, incremental migration module that 
 
 ## Current Repo Findings (relevant constraints)
 
-- `apps/migration` is currently empty besides a short README.
+- `apps/migration` is fully implemented and contains the python-based migration module.
 - Backend models live in `apps/api/db/models.py` (SQLModel).
 - Snipe-IT access exists in `apps/api/services/snipeit/*` and already uses `requests`.
 - No Alembic migration tooling is present in the repo; schema changes need to be applied either:

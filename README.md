@@ -285,10 +285,13 @@ SSO_CALLBACK_URL=https://deti-makerlab.ua.pt/auth/auth
 
 DML_AUTH_KEY=your_client_key_here
 DML_AUTH_SECRET=your_client_secret_here
-
+# JWT
 JWT_SECRET_KEY=supersecretkey
 JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=60
+
+# Comma-separated list of university emails that should be granted the lab_technician role
+LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
 ```
 
 At the beginning of development, SSO and Snipe-IT values may be left empty if the repo contains mock adapters or local-only configuration.

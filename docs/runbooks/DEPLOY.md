@@ -49,6 +49,9 @@ JWT_EXPIRE_MINUTES=60
 
 # Frontend
 FRONTEND_URL=https://deti-makerlab.ua.pt/new
+
+# Comma-separated list of university emails that should be granted the lab_technician role (and thus Snipe-IT access)
+LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
 ```
 
 ## 3. Start the stack
@@ -100,3 +103,15 @@ Full migration documentation: `docs/migration/migration-module-plan-2d9421.md`
 ## 7. First-time database
 The database schema is applied automatically on first start via `infra/db/init/`.
 If you need to reset: `docker compose -f infra/docker/docker-compose.yml down -v`
+
+## 8. Managing Lab Technicians
+
+The system restricts Snipe-IT access exclusively to users with the `lab_technician` role. This mapping is controlled dynamically at login using the `LAB_TECHNICIANS` environment variable:
+
+- **Adding a Technician**: Add their university email address to the comma-separated list in `LAB_TECHNICIANS` inside `/apps/api/.env`, then rebuild/restart the `api` container:
+  ```bash
+  docker compose -f infra/docker/docker-compose.yml up -d --build api
+  ```
+- **Removing a Technician**: Remove their email from the list, then rebuild/restart the `api` container. Their role will automatically revert back to their default SSO role (e.g., student or professor) upon their next login.
+
+For more details on role synchronization and access control setup, see [SNIPEIT.md](../SNIPEIT.md).

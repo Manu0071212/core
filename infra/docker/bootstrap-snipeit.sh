@@ -92,7 +92,16 @@ else
     echo "Admin account already exists ($USER_COUNT users found)."
 fi
 
-# 5. Generate Personal Access Client if missing
+# 5. Ensure Passport encryption keys exist
+echo "Checking Passport encryption keys..."
+if ! docker exec "$CONTAINER_NAME" test -f storage/oauth-private.key >/dev/null 2>&1; then
+    echo "Passport encryption keys missing. Generating keys..."
+    docker exec "$CONTAINER_NAME" php artisan passport:keys --no-interaction
+else
+    echo "Passport encryption keys already exist."
+fi
+
+# 6. Generate Personal Access Client if missing
 echo "Checking personal access client..."
 CLIENT_EXISTS=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo Laravel\Passport\Client::where('personal_access_client', 1)->count();" | tr -d '\r\n')
 CLIENT_EXISTS=$(echo "$CLIENT_EXISTS" | grep -oE '[0-9]+' | head -n 1)
@@ -104,7 +113,7 @@ else
     echo "Personal access client already exists."
 fi
 
-# 6. Generate Personal Access Token
+# 7. Generate Personal Access Token
 echo "Generating API token..."
 TOKEN_OUTPUT=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo App\Models\User::first()->createToken('BootstrapToken')->accessToken;")
 # Clean up token output to make sure it contains only the JWT string
@@ -117,31 +126,35 @@ fi
 
 echo "API Token generated successfully!"
 
-# 7. Update environment variables in apps/api/.env
+# 8. Update environment variables in apps/api/.env
 ENV_FILE="$PROJECT_ROOT/apps/api/.env"
 if [ ! -f "$ENV_FILE" ]; then
     echo "Warning: apps/api/.env file does not exist. Creating from example..."
     cp "$PROJECT_ROOT/apps/api/.env.example" "$ENV_FILE"
 fi
 
-# Update or insert SNIPEIT_API_TOKEN in .env
-if grep -q "SNIPEIT_API_TOKEN=" "$ENV_FILE"; then
-    # Escape token for sed
-    ESCAPED_TOKEN=$(echo "$TOKEN" | sed 's/[&/\]/\\&/g')
-    # Use different sed options depending on OS (Linux vs macOS)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|SNIPEIT_API_TOKEN=.*|SNIPEIT_API_TOKEN=$ESCAPED_TOKEN|" "$ENV_FILE"
-    else
-        sed -i "s|SNIPEIT_API_TOKEN=.*|SNIPEIT_API_TOKEN=$ESCAPED_TOKEN|" "$ENV_FILE"
-    fi
-else
-    echo "" >> "$ENV_FILE"
-    echo "SNIPEIT_API_TOKEN=$TOKEN" >> "$ENV_FILE"
-fi
+# Update or insert SNIPEIT_API_TOKEN in .env using Python to avoid sed escaping issues
+python3 -c "
+import sys
+token = sys.argv[1]
+env_path = sys.argv[2]
+with open(env_path, 'r') as f:
+    lines = f.readlines()
+updated = False
+for i, line in enumerate(lines):
+    if line.strip().startswith('SNIPEIT_API_TOKEN='):
+        lines[i] = f'SNIPEIT_API_TOKEN={token}\n'
+        updated = True
+        break
+if not updated:
+    lines.append(f'\nSNIPEIT_API_TOKEN={token}\n')
+with open(env_path, 'w') as f:
+    f.writelines(lines)
+" "$TOKEN" "$ENV_FILE"
 
 echo "Updated SNIPEIT_API_TOKEN in $ENV_FILE"
 
-# 8. Restart API container
+# 9. Restart API container
 echo "Restarting API service to load the new token..."
 docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d --build api
 

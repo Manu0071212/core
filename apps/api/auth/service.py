@@ -120,14 +120,21 @@ def _create_snipeit_user(name: str, email: str) -> None:
         if rows and rows[0].get("email", "").lower() == email.lower():
             existing_user = rows[0]
             perms = existing_user.get("permissions") or {}
+            import json
+            if isinstance(perms, str):
+                try:
+                    perms = json.loads(perms)
+                except Exception:
+                    perms = {}
             if not isinstance(perms, dict) or str(perms.get("superuser")) not in ("1", "True"):
                 user_id = existing_user.get("id")
                 snipeit_client.patch(f"/api/v1/users/{user_id}", json_data={
-                    "permissions": {"superuser": 1}
+                    "permissions": json.dumps({"superuser": 1})
                 })
                 logger.info(f"Updated SnipeIT user permissions for {email} to superuser")
             return
 
+        import json
         snipeit_client.post("/api/v1/users", json_data={
             "first_name":            first_name,
             "last_name":             last_name,
@@ -136,7 +143,7 @@ def _create_snipeit_user(name: str, email: str) -> None:
             "password":              "ChangeMe123!",
             "password_confirmation": "ChangeMe123!",
             "activated":             True,
-            "permissions":           {"superuser": 1},
+            "permissions":           json.dumps({"superuser": 1}),
         })
         logger.info(f"SnipeIT user created for {email}")
     except Exception as e:

@@ -118,6 +118,14 @@ def _create_snipeit_user(name: str, email: str) -> None:
         response = snipeit_client.get("/api/v1/users", params={"search": email, "limit": 1})
         rows = response.get("rows", [])
         if rows and rows[0].get("email", "").lower() == email.lower():
+            existing_user = rows[0]
+            perms = existing_user.get("permissions") or {}
+            if not isinstance(perms, dict) or str(perms.get("superuser")) not in ("1", "True"):
+                user_id = existing_user.get("id")
+                snipeit_client.patch(f"/api/v1/users/{user_id}", json_data={
+                    "permissions": {"superuser": 1}
+                })
+                logger.info(f"Updated SnipeIT user permissions for {email} to superuser")
             return
 
         snipeit_client.post("/api/v1/users", json_data={
@@ -128,10 +136,11 @@ def _create_snipeit_user(name: str, email: str) -> None:
             "password":              "ChangeMe123!",
             "password_confirmation": "ChangeMe123!",
             "activated":             True,
+            "permissions":           {"superuser": 1},
         })
         logger.info(f"SnipeIT user created for {email}")
     except Exception as e:
-        logger.warning(f"Failed to create SnipeIT user for {email}: {e}")
+        logger.warning(f"Failed to create/update SnipeIT user for {email}: {e}")
 
 
 def get_or_create_user(user_data: dict):
@@ -141,9 +150,13 @@ def get_or_create_user(user_data: dict):
         full_name = f"{user_data.get('name', '')} {user_data.get('surname', '')}".strip()
         is_new = user is None
 
+        # Parse authorized technicians from environment
+        tech_emails_str = os.getenv("LAB_TECHNICIANS", "manuel.arez@ua.pt,jakub.suliga@ua.pt")
+        tech_emails = [email.strip().lower() for email in tech_emails_str.split(",") if email.strip()]
+
         if not user:
             user_email = user_data["email"]
-            assigned_role = "lab_technician" if user_email.lower() == "manuel.arez@ua.pt" else user_data.get("role", "student")
+            assigned_role = "lab_technician" if user_email.lower() in tech_emails else user_data.get("role", "student")
 
             user = User(
                 name=full_name or user_email.split("@")[0],
@@ -155,6 +168,13 @@ def get_or_create_user(user_data: dict):
             )
             db.add(user)
         else:
+            user_email = user_data["email"]
+            if user_email.lower() in tech_emails:
+                user.role = "lab_technician"
+            elif user.role == "lab_technician":
+                # If they were a technician but are no longer in the environment variable list, revert to their SSO role
+                user.role = user_data.get("role", "student")
+
             if full_name:
                 user.name = full_name
             if user_data.get("nmec"):

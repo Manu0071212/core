@@ -60,3 +60,42 @@ Once the backend is configured, you can verify the connection by triggering the 
 
 If the token is valid, it will return a success message with stats of how many items were updated. If the token is invalid, it will return a `401 Unauthorized` exception.
 
+
+---
+
+## Managing Lab Technicians
+
+The DETI Maker Lab system dynamically maps University SSO accounts to the `lab_technician` role on login. Only users with the `lab_technician` role are granted access to the Snipe-IT inventory system.
+
+### How to Add a Technician
+To grant a user technician privileges:
+1. Open the `/apps/api/.env` file in the codebase.
+2. Locate the `LAB_TECHNICIANS` environment variable. It contains a comma-separated list of technician emails:
+   ```env
+   LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
+   ```
+3. Add the user's university email to this list (separated by a comma). All emails are case-insensitive.
+   *Example:*
+   ```env
+   LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt,new.tech@ua.pt
+   ```
+4. Restart the API container to load the updated environment variables:
+   ```bash
+   cd infra/docker
+   docker compose up -d --build api
+   ```
+5. The next time the user logs in via the University SSO, their role in the Maker Lab database will automatically be updated to `lab_technician`. In addition:
+   - They will be auto-provisioned inside Snipe-IT if their account doesn't exist yet.
+   - They will automatically be granted superuser (`admin`) permissions inside Snipe-IT.
+
+### How to Remove a Technician
+To revoke technician privileges:
+1. Open the `/apps/api/.env` file in the codebase.
+2. Locate the `LAB_TECHNICIANS` environment variable.
+3. Remove the user's email from the comma-separated list.
+4. Restart the API container:
+   ```bash
+   cd infra/docker
+   docker compose up -d --build api
+   ```
+5. The next time the user logs in via SSO, their role in the Maker Lab database will automatically revert back to their default university role (e.g. `student` or `professor`), immediately revoking their access to Snipe-IT at the API and proxy level.

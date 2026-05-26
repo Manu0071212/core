@@ -49,6 +49,9 @@ JWT_EXPIRE_MINUTES=60
 
 # Frontend
 FRONTEND_URL=https://deti-makerlab.ua.pt/new
+
+# Comma-separated list of university emails that should be granted the lab_technician role (and thus Snipe-IT access)
+LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt
 ```
 
 ## 3. Start the stack
@@ -56,12 +59,23 @@ FRONTEND_URL=https://deti-makerlab.ua.pt/new
 docker compose -f infra/docker/docker-compose.yml up -d --build
 ```
 
-## 4. Verify
+## 4. Bootstrap Snipe-IT and API integration
+
+DETI Maker Lab includes an automated bootstrapping script to configure Snipe-IT (creating the first administrative user, setting up database keys, generating the API Personal Access Token) and automatically inject the generated API token into the backend API environment configuration (`.env`).
+
+Run the bootstrap script from the repository root:
+```bash
+./infra/docker/bootstrap-snipeit.sh
+```
+
+This script will wait for Snipe-IT to fully initialize, create the admin credentials, generate the API token, save it to `apps/api/.env`, and restart the backend service automatically.
+
+## 5. Verify
 - `https://deti-makerlab.ua.pt/new` — web app
 - `https://deti-makerlab.ua.pt/new/api/docs` — API docs
 - `https://deti-makerlab.ua.pt/new/snipe-it` — Snipe-IT
 
-## 5. Configure Snipe-IT Status Labels
+## 6. Configure Snipe-IT Status Labels
 
 Before starting the stack, the Snipe-IT instance needs specific status labels configured.
 
@@ -80,7 +94,7 @@ Go to **Settings → Status Labels** in Snipe-IT and:
    - Status type: **Deployable**
 
 
-## 6. Run the migration (optional but recommended)
+## 7. Run the migration (optional but recommended)
 
 If migrating data from the legacy Maker Lab Wiki, run the migration module after the stack is up:
 
@@ -97,6 +111,18 @@ python apps/migration/makerlab_migrate/cli.py \
 
 Full migration documentation: `docs/migration/migration-module-plan-2d9421.md`
 
-## 7. First-time database
+## 8. First-time database
 The database schema is applied automatically on first start via `infra/db/init/`.
 If you need to reset: `docker compose -f infra/docker/docker-compose.yml down -v`
+
+## 9. Managing Lab Technicians
+
+The system restricts Snipe-IT access exclusively to users with the `lab_technician` role. This mapping is controlled dynamically at login using the `LAB_TECHNICIANS` environment variable:
+
+- **Adding a Technician**: Add their university email address to the comma-separated list in `LAB_TECHNICIANS` inside `/apps/api/.env`, then rebuild/restart the `api` container:
+  ```bash
+  docker compose -f infra/docker/docker-compose.yml up -d --build api
+  ```
+- **Removing a Technician**: Remove their email from the list, then rebuild/restart the `api` container. Their role will automatically revert back to their default SSO role (e.g., student or professor) upon their next login.
+
+For more details on role synchronization and access control setup, see [SNIPEIT.md](../SNIPEIT.md).

@@ -285,10 +285,13 @@ SSO_CALLBACK_URL=https://deti-makerlab.ua.pt/auth/auth
 
 DML_AUTH_KEY=your_client_key_here
 DML_AUTH_SECRET=your_client_secret_here
-
+# JWT
 JWT_SECRET_KEY=supersecretkey
 JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=60
+
+# Comma-separated list of university emails that should be granted the lab_technician role
+LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt
 ```
 
 At the beginning of development, SSO and Snipe-IT values may be left empty if the repo contains mock adapters or local-only configuration.
@@ -350,6 +353,11 @@ Check running containers:
 
 ```bash
 docker ps
+```
+
+Once the containers are running, bootstrap Snipe-IT and generate/inject the API token automatically by running:
+```bash
+./infra/docker/bootstrap-snipeit.sh
 ```
 
 The database schema is automatically applied by `schema.sql` found in `infra/db/init/` when the Postgres container starts for the first time. To load the seed test data, run the seed command (see [Section 10](#10-database-initialization)).

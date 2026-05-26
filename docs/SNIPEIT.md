@@ -72,12 +72,12 @@ To grant a user technician privileges:
 1. Open the `/apps/api/.env` file in the codebase.
 2. Locate the `LAB_TECHNICIANS` environment variable. It contains a comma-separated list of technician emails:
    ```env
-   LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
+   LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt
    ```
 3. Add the user's university email to this list (separated by a comma). All emails are case-insensitive.
    *Example:*
    ```env
-   LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt,new.tech@ua.pt
+   LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt,new.tech@ua.pt
    ```
 4. Restart the API container to load the updated environment variables:
    ```bash

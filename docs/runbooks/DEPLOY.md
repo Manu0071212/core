@@ -51,7 +51,7 @@ JWT_EXPIRE_MINUTES=60
 FRONTEND_URL=https://deti-makerlab.ua.pt/new
 
 # Comma-separated list of university emails that should be granted the lab_technician role (and thus Snipe-IT access)
-LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
+LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt
 ```
 
 ## 3. Start the stack

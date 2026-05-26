@@ -291,7 +291,7 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=60
 
 # Comma-separated list of university emails that should be granted the lab_technician role
-LAB_TECHNICIANS=manuel.arez@ua.pt,jakub.suliga@ua.pt
+LAB_TECHNICIANS=lab.tech@ua.pt,another.labtech@ua.pt
 ```
 
 At the beginning of development, SSO and Snipe-IT values may be left empty if the repo contains mock adapters or local-only configuration.

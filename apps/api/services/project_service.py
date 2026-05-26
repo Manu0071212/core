@@ -65,8 +65,8 @@ def create_project(session: Session, data: dict, created_by: int) -> dict:
 
     for sup in supervisors:
         user = session.get(User, sup["user_id"])
-        if not user or user.role != "professor" or user.role != "lab_technician":
-            raise ValueError(f"User {sup['user_id']} is not a professor")
+        if not user or user.role != "professor":
+            raise ValueError(f"User {sup['user_id']} is not a professor {user.role}")
 
     project = Project(
         name=data["name"],

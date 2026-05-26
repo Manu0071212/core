@@ -47,7 +47,24 @@ if [ $attempt -gt $MAX_ATTEMPTS ]; then
     exit 1
 fi
 
-# 3. Create Admin Account if none exists
+# 3. Configure/Initialize settings to skip Snipe-IT setup wizard and enable Remote User login
+echo "Configuring Snipe-IT settings..."
+docker exec "$CONTAINER_NAME" php artisan tinker --execute="
+\$s = App\Models\Setting::first() ?? new App\Models\Setting;
+if (!\$s->exists) {
+    \$s->site_name = 'DETI Maker Lab Inventory';
+    \$s->brand = 1;
+    \$s->per_page = 20;
+    \$s->locale = 'en-US';
+}
+\$s->login_remote_user_enabled = 1;
+\$s->login_remote_user_header_name = 'HTTP_X_REMOTE_USER';
+\$s->login_remote_user_custom_logout_url = 'https://deti-makerlab.ua.pt/api/auth/logout';
+\$s->save();
+echo 'Settings configured successfully!';
+"
+
+# 4. Create Admin Account if none exists
 echo "Checking existing users..."
 USER_COUNT=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo App\Models\User::count();" | tr -d '\r\n')
 # Clean up any Laravel shell prompt or wrapper junk
@@ -75,7 +92,7 @@ else
     echo "Admin account already exists ($USER_COUNT users found)."
 fi
 
-# 4. Generate Personal Access Client if missing
+# 5. Generate Personal Access Client if missing
 echo "Checking personal access client..."
 CLIENT_EXISTS=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo Laravel\Passport\Client::where('personal_access_client', 1)->count();" | tr -d '\r\n')
 CLIENT_EXISTS=$(echo "$CLIENT_EXISTS" | grep -oE '[0-9]+' | head -n 1)
@@ -87,7 +104,7 @@ else
     echo "Personal access client already exists."
 fi
 
-# 5. Generate Personal Access Token
+# 6. Generate Personal Access Token
 echo "Generating API token..."
 TOKEN_OUTPUT=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo App\Models\User::first()->createToken('BootstrapToken')->accessToken;")
 # Clean up token output to make sure it contains only the JWT string
@@ -100,7 +117,7 @@ fi
 
 echo "API Token generated successfully!"
 
-# 6. Update environment variables in apps/api/.env
+# 7. Update environment variables in apps/api/.env
 ENV_FILE="$PROJECT_ROOT/apps/api/.env"
 if [ ! -f "$ENV_FILE" ]; then
     echo "Warning: apps/api/.env file does not exist. Creating from example..."
@@ -124,7 +141,7 @@ fi
 
 echo "Updated SNIPEIT_API_TOKEN in $ENV_FILE"
 
-# 7. Restart API container
+# 8. Restart API container
 echo "Restarting API service to load the new token..."
 docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d --build api
 

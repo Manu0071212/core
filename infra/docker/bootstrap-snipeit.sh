@@ -79,14 +79,14 @@ if [ -z "$USER_COUNT" ] || [ "$USER_COUNT" -eq 0 ]; then
     
     docker exec "$CONTAINER_NAME" php artisan snipeit:create-admin \
         --first_name="Technician" \
-        --last_name="Smith" \
-        --email="noreply@deti-makerlab.ua.pt" \
-        --username="technician" \
+        --last_name="Admin" \
+        --email="admin@deti-makerlab.ua.pt" \
+        --username="admin" \
         --password="$ADMIN_PASS" \
         --no-interaction
         
     echo "Admin created successfully!"
-    echo "Username: technician"
+    echo "Username: admin"
     echo "Password: $ADMIN_PASS"
 else
     echo "Admin account already exists ($USER_COUNT users found)."

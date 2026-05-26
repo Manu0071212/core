@@ -93,10 +93,28 @@ def sso_login_mobile(web_redirect: str = ""):
 
 @router.get("/snipeit/verify")
 def verify_snipeit(request: Request, db: Session = Depends(get_session)):
-    # 1. Read token from cookie or query parameter
+    # 1. Read token from cookie or query parameter / original URI
     token = request.cookies.get("token")
+    should_set_cookie = False
+    
     if not token:
         token = request.query_params.get("token")
+        if token:
+            should_set_cookie = True
+            
+    if not token:
+        orig_uri = request.headers.get("x-original-uri")
+        if orig_uri and "?" in orig_uri:
+            from urllib.parse import urlparse, parse_qs
+            try:
+                parsed = urlparse(orig_uri)
+                q_params = parse_qs(parsed.query)
+                token_list = q_params.get("token")
+                if token_list:
+                    token = token_list[0]
+                    should_set_cookie = True
+            except Exception:
+                pass
         
     if not token:
         raise HTTPException(status_code=401, detail="No token provided")
@@ -130,8 +148,8 @@ def verify_snipeit(request: Request, db: Session = Depends(get_session)):
     response = Response(status_code=200)
     response.headers["X-Remote-User"] = username
     
-    # If the token was retrieved from query params, store it in the browser's cookies
-    if request.query_params.get("token") == token:
+    # If the token was retrieved from query params or original URI, store it in the browser's cookies
+    if should_set_cookie:
         response.set_cookie(
             key="token",
             value=token,

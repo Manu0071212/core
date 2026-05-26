@@ -101,6 +101,24 @@ SCHEMA_CHANGES = [
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
     """,
+
+    # Add missing columns to equipment_request
+    """
+    ALTER TABLE equipment_request
+    ADD COLUMN IF NOT EXISTS snipeit_asset_id BIGINT NULL
+    """,
+    """
+    ALTER TABLE equipment_request
+    ADD COLUMN IF NOT EXISTS checked_out_at TIMESTAMP NULL
+    """,
+    """
+    ALTER TABLE equipment_request
+    ADD COLUMN IF NOT EXISTS returned_at TIMESTAMP NULL
+    """,
+    """
+    ALTER TABLE equipment_request
+    ADD COLUMN IF NOT EXISTS expected_checkin TIMESTAMP NULL
+    """,
 ]
 
 

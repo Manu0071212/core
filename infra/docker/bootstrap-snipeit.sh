@@ -97,8 +97,11 @@ echo "Checking Passport encryption keys..."
 if ! docker exec "$CONTAINER_NAME" test -f storage/oauth-private.key >/dev/null 2>&1; then
     echo "Passport encryption keys missing. Generating keys..."
     docker exec "$CONTAINER_NAME" php artisan passport:keys --no-interaction
+    docker exec "$CONTAINER_NAME" chown -R docker:root /var/lib/snipeit/keys
 else
     echo "Passport encryption keys already exist."
+    # Ensure they are readable just in case
+    docker exec "$CONTAINER_NAME" chown -R docker:root /var/lib/snipeit/keys
 fi
 
 # 6. Generate Personal Access Client if missing

@@ -355,6 +355,11 @@ Check running containers:
 docker ps
 ```
 
+Once the containers are running, bootstrap Snipe-IT and generate/inject the API token automatically by running:
+```bash
+./infra/docker/bootstrap-snipeit.sh
+```
+
 The database schema is automatically applied by `schema.sql` found in `infra/db/init/` when the Postgres container starts for the first time. To load the seed test data, run the seed command (see [Section 10](#10-database-initialization)).
 
 ---

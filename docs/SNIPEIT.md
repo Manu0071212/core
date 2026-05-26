@@ -16,9 +16,19 @@ SNIPEIT_API_TOKEN=your_generated_token_here
 
 ---
 
-## How to generate a new Snipe-IT API Token
+## How to configure / update the Snipe-IT API Token
 
-If you are setting up Snipe-IT for the first time, or if your token expires/gets revoked, follow these steps to generate a new one:
+To connect the MakerLab API and Snipe-IT, the backend needs the `SNIPEIT_API_TOKEN` environment variable set in `apps/api/.env`. You can configure this token using one of the following methods:
+
+### Method A: Automated Bootstrapping (Recommended)
+If you are deploying for the first time or want to regenerate the token automatically, run the bootstrap script from the repository root:
+```bash
+./infra/docker/bootstrap-snipeit.sh
+```
+This script will wait for Snipe-IT to initialize, create the admin user (if missing), register the personal access client, generate a token, update `apps/api/.env`, and automatically restart the backend.
+
+### Method B: Manual Generation (Fallback)
+If you prefer to generate a token manually via the web interface:
 
 1. **Login to Snipe-IT**
    Navigate to your Snipe-IT dashboard (e.g., `https://deti-makerlab.ua.pt/new/snipe-it`) and log in with an Administrator account.
@@ -49,7 +59,7 @@ If you are setting up Snipe-IT for the first time, or if your token expires/gets
    Restart the FastAPI service to pull in the new environment variables:
    ```bash
    cd infra/docker
-   docker compose up -d --build
+   docker compose up -d --build api
    ```
 
 ## Verifying the Connection

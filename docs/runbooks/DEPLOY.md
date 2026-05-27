@@ -56,116 +56,59 @@ APP_URL=https://deti-makerlab.ua.pt/new/snipe-it
 
 ### 2c. Deployment URLs in docker-compose.yml
 
-Open `infra/docker/docker-compose.yml` and update the URL variables near the top:
+Open `infra/docker/docker-compose.yml` and update the `x-deployment: &deployment` parameters block near the top. This is the single source of truth for all containers:
 
 ```yaml
-# nginx environment (controls reverse-proxy routing and redirects):
-environment:
-  NGINX_FRONTEND_HOST: "deti-makerlab.ua.pt"
-  NGINX_BASE_PATH: "/new"
-  NGINX_API_PATH: "/new/api"
-  NGINX_SNIPEIT_PATH: "/new/snipe-it"
-  NGINX_FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
-  NGINX_SNIPEIT_URL:  "https://deti-makerlab.ua.pt/new/snipe-it"
-  NGINX_API_URL:      "https://deti-makerlab.ua.pt/new/api"
-
-# web build args (baked into the Next.js bundle at build time):
-args:
-  NEXT_PUBLIC_BASE_PATH: "/new"
-  NEXT_PUBLIC_API_URL: "/new/api"   # must equal NGINX_API_PATH
-  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+x-deployment: &deployment
+  MAKERLAB_DOMAIN: "deti-makerlab.ua.pt"
+  NEXT_PUBLIC_BASE_PATH: "/new" # or ""
+  FRONTEND_URL: "https://deti-makerlab.ua.pt/new" # or "https://deti-makerlab.ua.pt"
+  NEXT_PUBLIC_API_URL: "/new/api" # or "/api"
+  API_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/api" # or "https://deti-makerlab.ua.pt/api"
+  SNIPEIT_PATH: "/new/snipe-it" # or "/snipe-it"
+  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it" # or "https://deti-makerlab.ua.pt/snipe-it"
+  APP_URL: "https://deti-makerlab.ua.pt/new/snipe-it" # or "https://deti-makerlab.ua.pt/snipe-it"
+  SNIPEIT_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/snipe-it" # or "https://deti-makerlab.ua.pt/snipe-it"
 ```
 
 ---
 
 ## 3. URL Configuration Guide
 
-### Variables explained
-
-| Variable | Where set | Purpose |
-|---|---|---|
-| `FRONTEND_URL` | `apps/api/.env` | Backend: CORS, SSO redirect, logout redirect |
-| `SNIPEIT_PUBLIC_URL` | `apps/api/.env` | Backend: used in nginx 401 redirect config |
-| `SSO_CALLBACK_URL` | `apps/api/.env` | Fixed SSO callback URL registered at identity.ua.pt |
-| `SNIPEIT_BASE_URL` | `apps/api/.env` | Internal Docker URL for backend API calls to Snipe-IT |
-| `APP_URL` | `infra/snipeit/.env.snipeit` | Snipe-IT self-URL (must match `SNIPEIT_PUBLIC_URL`) |
-| `NGINX_*` vars | `docker-compose.yml` nginx env | nginx routing, proxy_redirect, error redirects |
-| `NEXT_PUBLIC_BASE_PATH` | `docker-compose.yml` web build.args | Next.js path prefix, baked at build time |
-| `NEXT_PUBLIC_API_URL` | `docker-compose.yml` web build.args | Frontend API path prefix — **must equal `NGINX_API_PATH`** (e.g. `/new/api` or `/api`) |
-| `NEXT_PUBLIC_SNIPEIT_URL` | `docker-compose.yml` web build.args | Snipe-IT link in the sidebar |
+To switch between `/new` prefix and root path deployment, you only need to change the values inside the `x-deployment: &deployment` block in `docker-compose.yml` and run the build command. Docker Compose will automatically override the values in `.env` files for the backend and Snipe-IT containers.
 
 ### Example: deployment under `/new` (current testing)
 
-```
-MakerLab URL:  https://deti-makerlab.ua.pt/new
-API URL:       https://deti-makerlab.ua.pt/new/api
-Snipe-IT URL:  https://deti-makerlab.ua.pt/new/snipe-it
-SSO Callback:  https://deti-makerlab.ua.pt/auth/auth  ← no /new prefix
-```
-
-```env
-# apps/api/.env
-FRONTEND_URL=https://deti-makerlab.ua.pt/new
-SNIPEIT_PUBLIC_URL=https://deti-makerlab.ua.pt/new/snipe-it
-SSO_CALLBACK_URL=https://deti-makerlab.ua.pt/auth/auth
-```
-```env
-# infra/snipeit/.env.snipeit
-APP_URL=https://deti-makerlab.ua.pt/new/snipe-it
-```
 ```yaml
-# docker-compose.yml — nginx environment
-NGINX_FRONTEND_HOST: "deti-makerlab.ua.pt"
-NGINX_BASE_PATH: "/new"
-NGINX_API_PATH: "/new/api"
-NGINX_SNIPEIT_PATH: "/new/snipe-it"
-NGINX_FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
-NGINX_SNIPEIT_URL:  "https://deti-makerlab.ua.pt/new/snipe-it"
-NGINX_API_URL:      "https://deti-makerlab.ua.pt/new/api"
-
-# docker-compose.yml — web build args
-NEXT_PUBLIC_BASE_PATH: "/new"
-NEXT_PUBLIC_API_URL: "/new/api"   # must match NGINX_API_PATH
-NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+x-deployment: &deployment
+  MAKERLAB_DOMAIN: "deti-makerlab.ua.pt"
+  NEXT_PUBLIC_BASE_PATH: "/new"
+  FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
+  NEXT_PUBLIC_API_URL: "/new/api"
+  API_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/api"
+  SNIPEIT_PATH: "/new/snipe-it"
+  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  APP_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  SNIPEIT_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
 ```
 
 ### Example: final deployment at root (no prefix)
 
-```
-MakerLab URL:  https://deti-makerlab.ua.pt
-API URL:       https://deti-makerlab.ua.pt/api
-Snipe-IT URL:  https://deti-makerlab.ua.pt/snipe-it
-SSO Callback:  https://deti-makerlab.ua.pt/auth/auth
-```
-
-```env
-# apps/api/.env
-FRONTEND_URL=https://deti-makerlab.ua.pt
-SNIPEIT_PUBLIC_URL=https://deti-makerlab.ua.pt/snipe-it
-SSO_CALLBACK_URL=https://deti-makerlab.ua.pt/auth/auth
-```
-```env
-# infra/snipeit/.env.snipeit
-APP_URL=https://deti-makerlab.ua.pt/snipe-it
-```
 ```yaml
-# docker-compose.yml — nginx environment
-NGINX_FRONTEND_HOST: "deti-makerlab.ua.pt"
-NGINX_BASE_PATH: ""
-NGINX_API_PATH: "/api"
-NGINX_SNIPEIT_PATH: "/snipe-it"
-NGINX_FRONTEND_URL: "https://deti-makerlab.ua.pt"
-NGINX_SNIPEIT_URL:  "https://deti-makerlab.ua.pt/snipe-it"
-NGINX_API_URL:      "https://deti-makerlab.ua.pt/api"
-
-# docker-compose.yml — web build args
-NEXT_PUBLIC_BASE_PATH: ""
-NEXT_PUBLIC_API_URL: "/api"       # matches NGINX_API_PATH (root deployment)
-NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/snipe-it"
+x-deployment: &deployment
+  MAKERLAB_DOMAIN: "deti-makerlab.ua.pt"
+  NEXT_PUBLIC_BASE_PATH: ""
+  FRONTEND_URL: "https://deti-makerlab.ua.pt"
+  NEXT_PUBLIC_API_URL: "/api"
+  API_PUBLIC_URL: "https://deti-makerlab.ua.pt/api"
+  SNIPEIT_PATH: "/snipe-it"
+  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/snipe-it"
+  APP_URL: "https://deti-makerlab.ua.pt/snipe-it"
+  SNIPEIT_PUBLIC_URL: "https://deti-makerlab.ua.pt/snipe-it"
 ```
 
 > [!WARNING]
-> When changing URL variables, you **must rebuild** the containers because `NEXT_PUBLIC_*` variables are baked into the Next.js bundle at build time:
+> When changing URL parameters, you **must rebuild** the containers because the Next.js frontend has variables baked in at build time:
 > ```bash
 > docker compose -f infra/docker/docker-compose.yml up -d --build
 > ```

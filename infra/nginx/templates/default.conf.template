@@ -31,13 +31,13 @@ upstream frontend {
 
 server {
     listen 80;
-    server_name ${NGINX_FRONTEND_HOST};
+    server_name ${MAKERLAB_DOMAIN};
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name ${NGINX_FRONTEND_HOST};
+    server_name ${MAKERLAB_DOMAIN};
 
     ssl_certificate     /etc/nginx/certs/selfsigned.crt;
     ssl_certificate_key /etc/nginx/certs/selfsigned.key;
@@ -64,8 +64,8 @@ server {
     }
 
     # ── API (public prefix: BASE_PATH/api/) ──────────────────────────────────
-    location ${NGINX_API_PATH}/ {
-        rewrite ^${NGINX_API_PATH}/(.*) /$1 break;
+    location ^~ ${NEXT_PUBLIC_API_URL}/ {
+        rewrite ^${NEXT_PUBLIC_API_URL}/(.*) /$1 break;
         proxy_pass http://api;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -74,7 +74,7 @@ server {
     }
 
     # ── Snipe-IT (public prefix: BASE_PATH/snipe-it/) ────────────────────────
-    location ${NGINX_SNIPEIT_PATH}/ {
+    location ^~ ${SNIPEIT_PATH}/ {
         auth_request /auth-verify;
 
         auth_request_set $sso_user $upstream_http_x_remote_user;
@@ -86,7 +86,7 @@ server {
         error_page 401 = @error401_snipeit;
         error_page 403 = @error403_snipeit;
 
-        rewrite ^${NGINX_SNIPEIT_PATH}/(.*) /$1 break;
+        rewrite ^${SNIPEIT_PATH}/(.*) /$1 break;
         proxy_pass http://snipeit;
 
         # proxy_redirect is OFF because Snipe-IT is configured with APP_URL that
@@ -100,12 +100,12 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
         # Tell Snipe-IT what path prefix it's served under so it generates correct URLs
-        proxy_set_header X-Forwarded-Prefix ${NGINX_SNIPEIT_PATH};
+        proxy_set_header X-Forwarded-Prefix ${SNIPEIT_PATH};
     }
 
     # 401 → redirect to SSO login for Snipe-IT access
     location @error401_snipeit {
-        return 302 ${NGINX_API_URL}/auth/sso/login/mobile?web_redirect=${NGINX_SNIPEIT_URL}/;
+        return 302 ${API_PUBLIC_URL}/auth/sso/login/mobile?web_redirect=${SNIPEIT_PUBLIC_URL}/;
     }
 
     location @error403_snipeit {
@@ -113,20 +113,10 @@ server {
     }
 
     # ── Frontend (public prefix: BASE_PATH) ──────────────────────────────────
-    # Exact match for base path without trailing slash
-    location = ${NGINX_BASE_PATH} {
-        proxy_pass http://frontend;
-        proxy_set_header Host              $host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade           $http_upgrade;
-        proxy_set_header Connection        "upgrade";
-    }
-
-    # All other paths under base path
-    location ${NGINX_BASE_PATH}/ {
+    # Matches BASE_PATH (exactly or with trailing slash/sub-paths) and proxies to frontend.
+    # We use regex to prevent Nginx from doing an automatic 301 trailing-slash redirect
+    # for prefix locations (which loops because Next.js redirects back to non-trailing slash).
+    location ~ ^${NEXT_PUBLIC_BASE_PATH}(/|$) {
         proxy_pass http://frontend;
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
@@ -138,7 +128,12 @@ server {
     }
 
     # ── Root redirect → frontend base path ───────────────────────────────────
-    location / {
-        return 301 ${NGINX_BASE_PATH}/;
+    # This regex redirects any path NOT under BASE_PATH to the frontend root.
+    # When NGINX_BASE_PATH is "/new": matches "/", "/other", etc. → redirect to /new
+    # When NGINX_BASE_PATH is ""   : becomes ^(?!/).*$ which never matches any
+    #                                 nginx path (all paths start with /), so this
+    #                                 location is inert.
+    location ~ ^(?!${NEXT_PUBLIC_BASE_PATH}(/|$)).*$ {
+        return 301 ${FRONTEND_URL};
     }
 }

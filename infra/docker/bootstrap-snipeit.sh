@@ -6,6 +6,25 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Read FRONTEND_URL from apps/api/.env to derive the logout URL dynamically.
+# This avoids hardcoding the domain or path prefix in this script.
+ENV_FILE="$PROJECT_ROOT/apps/api/.env"
+FRONTEND_URL=""
+if [ -f "$ENV_FILE" ]; then
+    FRONTEND_URL=$(grep -E '^FRONTEND_URL=' "$ENV_FILE" | head -n 1 | cut -d'=' -f2- | tr -d "'\"")
+fi
+if [ -z "$FRONTEND_URL" ]; then
+    echo "WARNING: FRONTEND_URL not found in apps/api/.env. Using placeholder for Snipe-IT logout URL."
+    echo "         Update FRONTEND_URL in apps/api/.env before deploying."
+    FRONTEND_URL="https://CHANGE_ME"
+fi
+SNIPEIT_LOGOUT_URL="${FRONTEND_URL%/}/api/auth/logout"
+echo "Snipe-IT custom logout URL will be set to: $SNIPEIT_LOGOUT_URL"
+
+# Derive admin email domain from FRONTEND_URL
+FRONTEND_DOMAIN=$(echo "$FRONTEND_URL" | sed 's|https\?://||' | cut -d'/' -f1)
+ADMIN_EMAIL="admin@${FRONTEND_DOMAIN}"
+
 echo "--------------------------------------------------"
 echo "DETI Maker Lab - Snipe-IT Bootstrapping Tool"
 echo "--------------------------------------------------"
@@ -59,7 +78,7 @@ if (!\$s->exists) {
 }
 \$s->login_remote_user_enabled = 1;
 \$s->login_remote_user_header_name = 'HTTP_X_REMOTE_USER';
-\$s->login_remote_user_custom_logout_url = 'https://deti-makerlab.ua.pt/api/auth/logout';
+\$s->login_remote_user_custom_logout_url = '${SNIPEIT_LOGOUT_URL}';
 \$s->save();
 echo 'Settings configured successfully!';
 "
@@ -80,7 +99,7 @@ if [ -z "$USER_COUNT" ] || [ "$USER_COUNT" -eq 0 ]; then
     docker exec "$CONTAINER_NAME" php artisan snipeit:create-admin \
         --first_name="Technician" \
         --last_name="Admin" \
-        --email="admin@deti-makerlab.ua.pt" \
+        --email="$ADMIN_EMAIL" \
         --username="admin" \
         --password="$ADMIN_PASS" \
         --no-interaction
@@ -130,7 +149,6 @@ fi
 echo "API Token generated successfully!"
 
 # 8. Update environment variables in apps/api/.env
-ENV_FILE="$PROJECT_ROOT/apps/api/.env"
 if [ ! -f "$ENV_FILE" ]; then
     echo "Warning: apps/api/.env file does not exist. Creating from example..."
     cp "$PROJECT_ROOT/apps/api/.env.example" "$ENV_FILE"

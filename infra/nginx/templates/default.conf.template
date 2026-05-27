@@ -1,0 +1,144 @@
+# infra/nginx/templates/default.conf.template
+#
+# This file is processed by the nginx Docker image at container startup.
+# Environment variables are substituted using envsubst before the config is loaded.
+#
+# Required environment variables (set in infra/docker/docker-compose.yml):
+#
+#   NGINX_FRONTEND_HOST   — Public hostname only, e.g. deti-makerlab.ua.pt
+#   NGINX_BASE_PATH       — Path prefix for MakerLab, e.g. /new  (or empty string for root)
+#   NGINX_API_PATH        — Path prefix for the API,    e.g. /new/api
+#   NGINX_SNIPEIT_PATH    — Path prefix for Snipe-IT,  e.g. /new/snipe-it
+#   NGINX_FRONTEND_URL    — Full public MakerLab URL,  e.g. https://deti-makerlab.ua.pt/new
+#   NGINX_SNIPEIT_URL     — Full public Snipe-IT URL,  e.g. https://deti-makerlab.ua.pt/new/snipe-it
+#   NGINX_API_URL         — Full public API URL,       e.g. https://deti-makerlab.ua.pt/new/api
+#
+# NOTE: nginx variables like $host, $request_uri, $1, etc. are written as $${VAR}
+# in this template so that envsubst does NOT replace them. The nginx image
+# uses envsubst with an explicit list of env-var names to protect nginx dollar-variables.
+
+upstream api {
+    server api:8000;
+}
+
+upstream snipeit {
+    server snipeit:80;
+}
+
+upstream frontend {
+    server web:3000;
+}
+
+server {
+    listen 80;
+    server_name ${NGINX_FRONTEND_HOST};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ${NGINX_FRONTEND_HOST};
+
+    ssl_certificate     /etc/nginx/certs/selfsigned.crt;
+    ssl_certificate_key /etc/nginx/certs/selfsigned.key;
+
+    # ── University SSO callback ───────────────────────────────────────────────
+    # This location is ALWAYS at /auth/auth, independent of BASE_PATH.
+    # It matches what is registered at identity.ua.pt as the SSO callback URL.
+    location = /auth/auth {
+        proxy_pass http://api/auth/sso/callback$is_args$args;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # ── Internal auth verification subrequest (used by Snipe-IT auth_request) ─
+    location = /auth-verify {
+        internal;
+        proxy_pass http://api/auth/snipeit/verify$is_args$args;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-URI $request_uri;
+        proxy_set_header Cookie $http_cookie;
+    }
+
+    # ── API (public prefix: BASE_PATH/api/) ──────────────────────────────────
+    location ${NGINX_API_PATH}/ {
+        rewrite ^${NGINX_API_PATH}/(.*) /$1 break;
+        proxy_pass http://api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # ── Snipe-IT (public prefix: BASE_PATH/snipe-it/) ────────────────────────
+    location ${NGINX_SNIPEIT_PATH}/ {
+        auth_request /auth-verify;
+
+        auth_request_set $sso_user $upstream_http_x_remote_user;
+        proxy_set_header X-Remote-User $sso_user;
+
+        auth_request_set $auth_cookie $upstream_http_set_cookie;
+        add_header Set-Cookie $auth_cookie;
+
+        error_page 401 = @error401_snipeit;
+        error_page 403 = @error403_snipeit;
+
+        rewrite ^${NGINX_SNIPEIT_PATH}/(.*) /$1 break;
+        proxy_pass http://snipeit;
+
+        # proxy_redirect is OFF because Snipe-IT is configured with APP_URL that
+        # already includes the full public path (e.g. https://host/new/snipe-it).
+        # Snipe-IT therefore generates correct absolute URLs in Location headers
+        # by itself — adding proxy_redirect rules would double-prefix the path.
+        proxy_redirect off;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        # Tell Snipe-IT what path prefix it's served under so it generates correct URLs
+        proxy_set_header X-Forwarded-Prefix ${NGINX_SNIPEIT_PATH};
+    }
+
+    # 401 → redirect to SSO login for Snipe-IT access
+    location @error401_snipeit {
+        return 302 ${NGINX_API_URL}/auth/sso/login/mobile?web_redirect=${NGINX_SNIPEIT_URL}/;
+    }
+
+    location @error403_snipeit {
+        return 403 "Forbidden: Only lab technicians have access to SnipeIT.";
+    }
+
+    # ── Frontend (public prefix: BASE_PATH) ──────────────────────────────────
+    # Exact match for base path without trailing slash
+    location = ${NGINX_BASE_PATH} {
+        proxy_pass http://frontend;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+
+    # All other paths under base path
+    location ${NGINX_BASE_PATH}/ {
+        proxy_pass http://frontend;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+
+    # ── Root redirect → frontend base path ───────────────────────────────────
+    location / {
+        return 301 ${NGINX_BASE_PATH}/;
+    }
+}

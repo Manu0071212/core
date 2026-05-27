@@ -1,5 +1,32 @@
 # infra/docker/docker-compose.yml
 
+# ─── Deployment URL Configuration ──────────────────────────────────────────────
+# All URL-related variables are defined here and propagated to the relevant
+# services. To change the public URLs, update ONLY these values and then run:
+#
+#   docker compose -f infra/docker/docker-compose.yml up -d --build
+#
+# ── Current testing deployment (under /new) ─────────────────────────────────
+#   MAKERLAB_BASE_PATH   = /new
+#   MAKERLAB_DOMAIN      = deti-makerlab.ua.pt
+#   MAKERLAB_FRONTEND_URL = https://deti-makerlab.ua.pt/new
+#   MAKERLAB_SNIPEIT_URL  = https://deti-makerlab.ua.pt/new/snipe-it
+#
+# ── Final deployment (at root, no prefix) ───────────────────────────────────
+#   MAKERLAB_BASE_PATH   = (empty)
+#   MAKERLAB_DOMAIN      = deti-makerlab.ua.pt
+#   MAKERLAB_FRONTEND_URL = https://deti-makerlab.ua.pt
+#   MAKERLAB_SNIPEIT_URL  = https://deti-makerlab.ua.pt/snipe-it
+# ────────────────────────────────────────────────────────────────────────────────
+
+# Deployment URL variables — edit these for each environment:
+x-deployment: &deployment
+  MAKERLAB_DOMAIN: "deti-makerlab.ua.pt"
+  MAKERLAB_BASE_PATH: "/new"
+  MAKERLAB_FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
+  MAKERLAB_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  MAKERLAB_API_URL: "https://deti-makerlab.ua.pt/new/api"
+
 services:
   postgres:
     image: postgres:16
@@ -39,6 +66,12 @@ services:
   web:
     build:
       context: ../../apps/web
+      args:
+        # These build args are declared as ARG/ENV in apps/web/Dockerfile and
+        # baked into the Next.js bundle at build time (NEXT_PUBLIC_* requirement).
+        NEXT_PUBLIC_BASE_PATH: "/new"
+        NEXT_PUBLIC_API_URL: "/new/api"
+        NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
     restart: unless-stopped
     expose:
       - "3000"
@@ -86,8 +119,22 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      # The template dir is processed by nginx at startup (envsubst → conf.d/).
+      # Do NOT mount conf.d here — the nginx image writes the rendered template
+      # output to /etc/nginx/conf.d/ inside the container at startup, and a
+      # read-only bind-mount on that directory causes a fatal crash loop.
+      - ../nginx/templates:/etc/nginx/templates:ro
       - ../nginx/certs:/etc/nginx/certs:ro
+    environment:
+      # nginx envsubst variables — derived from the deployment settings above.
+      # The nginx image substitutes these into default.conf.template at startup.
+      NGINX_FRONTEND_HOST: "deti-makerlab.ua.pt"
+      NGINX_BASE_PATH: "/new"
+      NGINX_API_PATH: "/new/api"
+      NGINX_SNIPEIT_PATH: "/new/snipe-it"
+      NGINX_FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
+      NGINX_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+      NGINX_API_URL: "https://deti-makerlab.ua.pt/new/api"
     depends_on:
       - api
       - web

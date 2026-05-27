@@ -87,7 +87,7 @@ export default function Sidebar() {
             assetIds.map(async (id) => {
               try {
                 const req = await fetch(
-                  `/new/api/requisitions/${id}`,
+                  `${process.env.NEXT_PUBLIC_API_URL ?? "/api"}/requisitions/${id}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -161,7 +161,9 @@ export default function Sidebar() {
     setIsMobileOpen(false);
   }, [pathname]);
 
-  if (pathname.startsWith("/new/auth")) return null;
+  // When Next.js basePath is set (e.g. /new), usePathname() returns paths
+  // WITHOUT the basePath prefix — e.g. '/auth/callback', not '/new/auth/callback'.
+  if (pathname.startsWith("/auth")) return null;
 
   const menuItems = [
     { name: t("sidebar.dashboard"),  href: "/",           icon: <LayoutDashboard size={20} /> },
@@ -186,7 +188,7 @@ export default function Sidebar() {
         href="/"
         className={`flex items-center h-16 shrink-0 mb-2 ${collapsed ? "justify-center px-4" : "px-5 gap-3"}`}
       >
-        <img src="/new/deti-maker-lab.png" alt="DETI MakerLab" className="w-9 h-9 object-contain shrink-0" />
+        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/deti-maker-lab.png`} alt="DETI MakerLab" className="w-9 h-9 object-contain shrink-0" />
         {!collapsed && (
           <span className="font-bold text-base text-indigo-600 truncate">DETI Maker Lab</span>
         )}
@@ -237,7 +239,7 @@ export default function Sidebar() {
             </Link>
 
             <a
-              href="https://deti-makerlab.ua.pt/new/snipe-it"
+              href={process.env.NEXT_PUBLIC_SNIPEIT_URL ?? "#"}
               target="_blank"
               rel="noopener noreferrer"
               className={`flex items-center rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all ${
@@ -288,7 +290,7 @@ export default function Sidebar() {
             href="/"
             className="flex items-center justify-center gap-2 min-w-0"
           >
-            <img src="/new/deti-maker-lab.png" alt="DETI MakerLab" className="w-8 h-8 object-contain shrink-0" />
+            <img src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/deti-maker-lab.png`} alt="DETI MakerLab" className="w-8 h-8 object-contain shrink-0" />
           </Link>
 
           <div className="flex items-center justify-end gap-1">

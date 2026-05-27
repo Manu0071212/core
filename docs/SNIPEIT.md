@@ -27,6 +27,9 @@ If you are deploying for the first time or want to regenerate the token automati
 ```
 This script will wait for Snipe-IT to initialize, create the admin user (if missing), register the personal access client, generate a token, update `apps/api/.env`, and automatically restart the backend.
 
+> [!WARNING]
+> If the script somehow would not connect Maker Lab with Snipe-IT automatically, then you should copy the admin account credentials that were provided in command line result of `./infra/docker/bootstrap-snipeit.sh` and proceed with method B.
+
 ### Method B: Manual Generation (Fallback)
 If you prefer to generate a token manually via the web interface:
 

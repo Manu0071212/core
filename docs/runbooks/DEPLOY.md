@@ -70,6 +70,9 @@ Run the bootstrap script from the repository root:
 
 This script will wait for Snipe-IT to fully initialize, create the admin credentials, generate the API token, save it to `apps/api/.env`, and restart the backend service automatically.
 
+> [!WARNING]
+> If the script fails to configure the Snipe-IT automatically, then see the `WARNING` section in [Automated Bootstrapping](../SNIPEIT.md#method-a-automated-bootstrapping-recommended).
+
 ## 5. Verify
 - `https://deti-makerlab.ua.pt/new` — web app
 - `https://deti-makerlab.ua.pt/new/api/docs` — API docs

@@ -24,7 +24,6 @@ PROTECTED_URL     = "https://identity.ua.pt/oauth/get_data"
 CLIENT_KEY    = os.getenv("DML_AUTH_KEY")
 CLIENT_SECRET = os.getenv("DML_AUTH_SECRET")
 SECRET_KEY    = os.getenv("JWT_SECRET_KEY")
-FRONTEND_URL  = os.getenv("FRONTEND_URL", "https://localhost:3000")
 
 if not CLIENT_KEY or not CLIENT_SECRET or not SECRET_KEY:
     raise RuntimeError("DML_AUTH_KEY, DML_AUTH_SECRET e JWT_SECRET_KEY devem estar definidos no .env")

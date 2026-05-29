@@ -143,7 +143,7 @@ export default function EquipmentDetailsPage() {
           <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm bg-white">
             <div className="h-64 bg-gray-50 flex items-center justify-center border-b border-gray-100 overflow-hidden">
               {item.image ? (
-                <img src={item.image.startsWith("http") ? item.image : `https://inventory.deti-makerlab.ua.pt/uploads/assets/${item.image}`}
+                <img src={item.image.startsWith("http") ? item.image : `${process.env.NEXT_PUBLIC_SNIPEIT_URL ?? ""}/uploads/assets/${item.image}`}
                   alt={name} className="h-full w-full object-contain" />
               ) : (
                 <ImageIcon size={80} className="text-gray-200" />

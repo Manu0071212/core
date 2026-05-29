@@ -14,10 +14,15 @@ function AuthCallbackInner() {
       document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
     }
 
-    const returnUrl = localStorage.getItem("returnUrl") ?? "/new";
+    // Next.js `basePath` is already applied to all <Link> and router.push() calls,
+    // but localStorage returnUrl was stored as a bare path (e.g. "/projects/1").
+    // window.location.replace uses the full URL, so we just use the stored path directly —
+    // Next.js basePath is handled by the router, not needed here since we replace to the same origin.
+    const returnUrl = localStorage.getItem("returnUrl") ?? "/";
     localStorage.removeItem("returnUrl");
 
-    const safeUrl = returnUrl.startsWith("/new") ? returnUrl : "/new" + returnUrl;
+    // Only allow same-origin relative paths to prevent open-redirect attacks.
+    const safeUrl = returnUrl.startsWith("/") ? returnUrl : "/";
     window.location.replace(safeUrl);
   }, [searchParams]);
 

@@ -12,7 +12,7 @@ SNIPEIT_BASE_URL=http://snipeit
 SNIPEIT_API_TOKEN=your_generated_token_here
 ```
 
-*Note: Inside docker-compose, `http://snipeit` is the internal service name. External testing from a local Python script might require `https://deti-makerlab.ua.pt/new/snipe-it` with SSL verification disabled.*
+*Note: Inside docker-compose, `http://snipeit` is the internal service name. External testing from a local Python script might require the public Snipe-IT URL (e.g. `https://deti-makerlab.ua.pt/new/snipe-it`) with SSL verification disabled. The public URL is set via `SNIPEIT_PUBLIC_URL` in `apps/api/.env`.*
 
 ---
 
@@ -34,7 +34,7 @@ This script will wait for Snipe-IT to initialize, create the admin user (if miss
 If you prefer to generate a token manually via the web interface:
 
 1. **Login to Snipe-IT**
-   Navigate to your Snipe-IT dashboard (e.g., `https://deti-makerlab.ua.pt/new/snipe-it`) and log in with an Administrator account.
+   Navigate to your Snipe-IT dashboard (the URL configured in `SNIPEIT_PUBLIC_URL`, e.g. `https://deti-makerlab.ua.pt/new/snipe-it`) and log in with an Administrator account.
 
 2. **Access Profile Settings**
    Click on your profile name / avatar in the **top-right corner** of the screen.

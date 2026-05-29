@@ -1,6 +1,13 @@
 // apps/web/src/lib/api.ts
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "https://deti-makerlab.ua.pt/new/api";
+// NEXT_PUBLIC_API_URL is set as a Docker build arg (see apps/web/Dockerfile).
+// It must be the FULL path prefix to the API as seen by the browser, including
+// any deployment base path. This must match NGINX_API_PATH in docker-compose.yml.
+// Examples:
+//   Deployment under /new:  NEXT_PUBLIC_API_URL=/new/api
+//   Deployment at root:     NEXT_PUBLIC_API_URL=/api
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;

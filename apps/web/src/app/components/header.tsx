@@ -37,7 +37,7 @@ export default function Header() {
           await Promise.allSettled(
             assetIds.map(async (id) => {
               try {
-                const req = await fetch(`/new/api/requisitions/${id}`, {
+                const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "/api"}/requisitions/${id}`, {
                   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
                 }).then((r) => r.json());
                 if (req?.snipeit_asset_id) {

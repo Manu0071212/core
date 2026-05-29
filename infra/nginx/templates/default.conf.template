@@ -89,16 +89,19 @@ server {
         rewrite ^${SNIPEIT_PATH}/(.*) /$1 break;
         proxy_pass http://snipeit;
 
+        proxy_redirect ~*^https://deti-makerlab\.ua\.pt/?$ ${SNIPEIT_PUBLIC_URL}/;
+
         # proxy_redirect is OFF because Snipe-IT is configured with APP_URL that
         # already includes the full public path (e.g. https://host/new/snipe-it).
         # Snipe-IT therefore generates correct absolute URLs in Location headers
         # by itself — adding proxy_redirect rules would double-prefix the path.
-        proxy_redirect off;
 
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port 443;
         # Tell Snipe-IT what path prefix it's served under so it generates correct URLs
         proxy_set_header X-Forwarded-Prefix ${SNIPEIT_PATH};
     }

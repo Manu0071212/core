@@ -20,23 +20,6 @@ import {
 import type { ProjectDetail, User, Requisition, EquipmentCatalogItem } from "@/lib/api";
 import { useTranslation } from "react-i18next";
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    active:    "bg-green-50 text-green-600 border-green-200",
-    pending:   "bg-yellow-50 text-yellow-600 border-yellow-200",
-    rejected:  "bg-red-50 text-red-500 border-red-200",
-    completed: "bg-blue-50 text-blue-600 border-blue-200",
-    reserved:  "bg-purple-50 text-purple-600 border-purple-200",
-    archived:  "bg-gray-100 text-gray-500 border-gray-200",
-    approved:  "bg-teal-50 text-teal-600 border-teal-200",
-  };
-  return (
-    <span className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full border ${map[status] ?? "bg-gray-100 text-gray-400 border-gray-200"}`}>
-      {status}
-    </span>
-  );
-}
-
 function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
   if (value === null || value === undefined || value === "") return null;
   return (
@@ -540,6 +523,13 @@ export default function ProjectDetailPage() {
     year: "numeric", month: "long", day: "numeric",
   });
 
+  const statusColor: Record<string, string> = {
+    active:      "bg-green-50 text-green-600",
+    pending:     "bg-yellow-50 text-yellow-600",
+    rejected:    "bg-red-50 text-red-500",
+    completed:   "bg-blue-50 text-blue-600",
+  };
+
   return (
     <main className="flex-1 bg-[#f4f5f7] px-4 sm:px-8 py-6 min-h-screen font-sans text-gray-900">
       <Header />
@@ -556,7 +546,9 @@ export default function ProjectDetailPage() {
         <div className="min-w-0">
           <div className="flex items-center gap-3 flex-wrap mb-1">
             <h1 className="text-2xl sm:text-3xl font-bold">{project.name}</h1>
-            <StatusBadge status={project.status} />
+            <span className={`px-3 py-1 ${statusColor[project.status] ?? "bg-gray-100 text-gray-500"} text-[10px] font-bold uppercase rounded-full`}>
+              {project.status === "pending" ? t("projectsPage.status.pending") : project.status === "completed" ? t("projectsPage.status.completed") : project.status === "active" ? t("projectsPage.status.active") : project.status === "rejected" ? t("projectsPage.status.rejected") : project.status}
+            </span>
           </div>
           <p className="text-gray-400 text-sm max-w-2xl">{project.description || t("projectsPage.details.noDescription")}</p>
         </div>
@@ -624,7 +616,7 @@ export default function ProjectDetailPage() {
                           <div className="text-xs text-gray-400 truncate">{u?.email ?? "..."}</div>
                         </div>
                       </div>
-                      <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-full shrink-0">Supervisor</span>
+                      <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase rounded-full shrink-0">{t("projectsPage.details.supervisor")}</span>
                     </div>
                   );
                 })}
@@ -646,7 +638,7 @@ export default function ProjectDetailPage() {
                         </div>
                       </div>
                       <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full shrink-0 ${m.role === "leader" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}>
-                        {m.role === "leader" ? t("projectsPage.new.leader") : m.role}
+                        {m.role === "leader" ? t("projectsPage.new.leader") : m.role === "member" ? t("projectsPage.details.member") : m.role }
                       </span>
                     </div>
                   );
@@ -691,32 +683,29 @@ export default function ProjectDetailPage() {
                   let statusColor = "bg-gray-100 text-gray-500";
 
                   if (req.status === "pending") {
-                    statusLabel = "Pending";
+                    statusLabel = t("projectsPage.status.pending");
                     statusColor = "bg-yellow-50 text-yellow-600";
                   } else if (req.status === "reserved") {
-                    statusLabel = "Reserved";
+                    statusLabel = t("projectsPage.status.reserved");
                     statusColor = "bg-purple-50 text-purple-600";
                   } else if (req.status === "returned") {
-                    statusLabel = "Returned";
+                    statusLabel = t("projectsPage.status.returned");
                     statusColor = "bg-green-50 text-green-600";
                   } else if (req.status === "rejected") {
-                    statusLabel = "Rejected";
+                    statusLabel = t("projectsPage.status.rejected");
                     statusColor = "bg-red-50 text-red-500";
-                  } else if (req.status === "cancelled") {
-                    statusLabel = "Cancelled";
-                    statusColor = "bg-gray-100 text-gray-400";
                   } else if (req.status === "checked_out") {
                     if (req.expected_checkin) {
                       const due = new Date(req.expected_checkin);
                       const isOverdue = due < now;
                       statusLabel = isOverdue
-                        ? "⚠ Overdue"
-                        : `Return by ${due.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}`;
+                        ? t("projectsPage.status.overdue")
+                        : `${t("projectsPage.status.returnBy")} ${due.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}`;
                       statusColor = isOverdue
                         ? "bg-red-50 text-red-600"
                         : "bg-orange-50 text-orange-600";
                     } else {
-                      statusLabel = "Checked Out";
+                      statusLabel = t("projectsPage.status.checkedOut");
                       statusColor = "bg-orange-50 text-orange-600";
                     }
                   }
@@ -829,15 +818,15 @@ export default function ProjectDetailPage() {
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
               <AlertCircle size={22} className="text-orange-500" />
             </div>
-            <h2 className="text-lg font-bold mb-2">Equipment not returned</h2>
+            <h2 className="text-lg font-bold mb-2">{t("projectsPage.complete.title")}</h2>
             <p className="text-gray-500 text-sm mb-6">
-              All equipment must be returned before completing the project. Please return the checked-out items and try again.
+              {t("projectsPage.complete.text")}
             </p>
             <button
               onClick={() => setShowBlockedModal(false)}
               className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 text-sm transition-colors"
             >
-              Got it
+              {t("projectsPage.complete.button")}
             </button>
           </div>
         </div>

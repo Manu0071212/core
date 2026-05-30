@@ -132,7 +132,8 @@
       "checkedOut": "Checked Out",
       "returned": "Returned",
       "rejected": "Rejected",
-      "returnBy": "Return By"
+      "returnBy": "Return By",
+      "overdue": "Overdue"
     },
     "projectsCreated": "Projects Created (Last 6 Months)",
     "topCourses": "Top Courses by Projects",
@@ -197,7 +198,8 @@
       "reserved": "Reserved",
       "returned": "Returned",
       "checkedOut": "Checked Out",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "returnBy": "Return By"
     },
     "returnBy": "Return by",
     "new": {
@@ -249,7 +251,9 @@
       "projectInfo": "Project Info",
       "team": "Team ({{count}})",
       "supervisors": "Supervisors",
+      "supervisor": "Supervisor",
       "members": "Members",
+      "member": "Member",
       "noMembers": "No members yet.",
       "equipment": "Equipment ({{count}})",
       "request": "Request",
@@ -274,6 +278,11 @@
         "noEquipmentSubtitle": "All items are in use or have pending requests.",
         "submit": "Submit"
       }
+    },
+    "complete": {
+      "title": "Equipment not returned",
+      "text": "All equipment must be returned before completing the project. Please return the checked-out items and try again.",
+      "button": "Got it"
     }
   },
   "ledgerPage": {

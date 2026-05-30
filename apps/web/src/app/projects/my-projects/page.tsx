@@ -87,26 +87,26 @@ export default function MyProjectsPage() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="relative w-full">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 mb-6 w-full">
+          <div className="relative flex-1 w-full">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 focus:ring-4 focus:ring-indigo-500/10"
+              className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none text-sm text-gray-600 placeholder:text-gray-400 transition-all shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
               placeholder={t("projectsPage.searchNamePlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          <div className="flex gap-2 flex-wrap pb-2">
+          <div className="flex flex-wrap gap-2">
             {FILTERS.map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
-                className={`px-5 py-2 rounded-lg text-xs font-bold whitespace-nowrap border transition-colors ${
+                className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap border transition-all shrink-0 ${
                   activeFilter === f
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {f === "All" ? t("usersPage.all") : t(`projectsPage.status.${f.toLowerCase()}` as any)}

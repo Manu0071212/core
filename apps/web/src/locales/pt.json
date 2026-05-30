@@ -132,7 +132,8 @@
       "checkedOut": "Requisitado",
       "returned": "Devolvido",
       "rejected": "Rejeitado",
-      "returnBy": "Devolver até"
+      "returnBy": "Devolver até",
+      "overdue": "Em Atraso"
     },
     "projectsCreated": "Projetos Criados (Últimos 6 Meses)",
     "topCourses": "Top Cursos por Projeto",
@@ -197,7 +198,8 @@
       "reserved": "Reservado",
       "returned": "Devolvido",
       "checkedOut": "Emprestado",
-      "overdue": "Em Atraso"
+      "overdue": "Em Atraso",
+      "returnBy": "Devolver até"
     },
     "returnBy": "Devolver até",
     "new": {
@@ -249,7 +251,9 @@
       "projectInfo": "Informação do Projeto",
       "team": "Equipa ({{count}})",
       "supervisors": "Orientadores",
+      "supervisor": "Orientador",
       "members": "Membros",
+      "member": "Membro",
       "noMembers": "Ainda sem membros.",
       "equipment": "Equipamento ({{count}})",
       "request": "Pedir",
@@ -274,6 +278,11 @@
         "noEquipmentSubtitle": "Todos os itens estão em uso ou têm pedidos pendentes.",
         "submit": "Submeter"
       }
+    },
+    "complete": {
+      "title": "Equipamento não devolvido",
+      "text": "Todo o equipamento deve ser devolvido antes da conclusão do projeto. Por favor, devolva os itens emprestados e tente novamente.",
+      "button": "Entendido"
     }
   },
   "ledgerPage": {

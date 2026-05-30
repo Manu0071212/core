@@ -122,12 +122,12 @@ export default function EquipmentDetailsPage() {
 
   const statusColor: Record<string, string> = {
     active:      "bg-green-50 text-green-600",
+    Available:   "bg-green-50 text-green-600",
     pending:     "bg-yellow-50 text-yellow-600",
     rejected:    "bg-red-50 text-red-500",
     completed:   "bg-blue-50 text-blue-600",
-    reserved:    "bg-purple-50 text-purple-600",
-    checked_out: "bg-orange-50 text-orange-600",
-    returned:    "bg-gray-50 text-gray-500",
+    Reserved:      "bg-purple-50 text-purple-600",
+    "Checked Out": "bg-orange-50 text-orange-600",
   };
 
   return (
@@ -157,8 +157,8 @@ export default function EquipmentDetailsPage() {
                     {item.category ?? t("equipmentPage.uncategorized")}
                   </span>
                 </div>
-                <span className="px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase rounded-full">
-                  {item.status}
+                <span className={`px-3 py-1 ${statusColor[item.status] ?? "bg-gray-100 text-gray-500"} text-[10px] font-bold uppercase rounded-full`}>
+                  {item.status === "Available" ? t("equipmentPage.available") : item.status === "Reserved" ? t("equipmentPage.reserved") : item.status === "Checked Out" ? t("equipmentPage.checkedOut") : item.status}
                 </span>
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function EquipmentDetailsPage() {
                       {proj.course && <div className="text-xs text-gray-400 mt-0.5">{proj.course}</div>}
                     </div>
                     <span className={`px-3 py-1 text-[10px] font-bold uppercase rounded-full ${statusColor[proj.status] ?? "bg-gray-100 text-gray-500"}`}>
-                      {proj.status}
+                      {proj.status === "pending" ? t("projectsPage.status.pending") : proj.status === "completed" ? t("projectsPage.status.completed") : proj.status === "active" ? t("projectsPage.status.active") : proj.status === "rejected" ? t("projectsPage.status.rejected") : proj.status}
                     </span>
                   </div>
                 </Link>

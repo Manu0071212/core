@@ -528,9 +528,9 @@ export default function ProjectDetailPage() {
   const isMember = currentUserId !== null &&
     (project.members ?? []).some((m) => m.user_id === currentUserId);
   // Lab technician can always see all buttons; members can see buttons for their own active/pending projects
-  const canEdit = isLabTech || (isMember && ["pending", "active"].includes(project.status));
-  const canComplete = isLabTech || (isMember && project.status === "active");
-  const canRequestEquipment = isLabTech || (isMember && ["pending", "active"].includes(project.status));
+  const canEdit = (isLabTech && ["pending", "active"].includes(project.status)) || (isMember && ["pending", "active"].includes(project.status));
+  const canComplete = (isLabTech && project.status === "active") || (isMember && project.status === "active");
+  const canRequestEquipment = (isLabTech && isMember && ["pending", "active"].includes(project.status))  || (isMember && ["pending", "active"].includes(project.status));
 
   const supervisorMembers = (project.members ?? []).filter((m) => m.role === "supervisor");
   const teamMembers       = (project.members ?? []).filter((m) => m.role !== "supervisor");

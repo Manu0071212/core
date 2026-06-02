@@ -9,24 +9,16 @@ from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 from db.models import User
 from db.database import get_session
-from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 import logging
+from core.config import settings
 
-load_dotenv()
 logger = logging.getLogger(__name__)
 
 REQUEST_TOKEN_URL = "https://identity.ua.pt/oauth/request_token"
 AUTHORIZATION_URL = "https://identity.ua.pt/oauth/authorize"
 ACCESS_TOKEN_URL  = "https://identity.ua.pt/oauth/access_token"
 PROTECTED_URL     = "https://identity.ua.pt/oauth/get_data"
-
-CLIENT_KEY    = os.getenv("DML_AUTH_KEY")
-CLIENT_SECRET = os.getenv("DML_AUTH_SECRET")
-SECRET_KEY    = os.getenv("JWT_SECRET_KEY")
-
-if not CLIENT_KEY or not CLIENT_SECRET or not SECRET_KEY:
-    raise RuntimeError("DML_AUTH_KEY, DML_AUTH_SECRET e JWT_SECRET_KEY devem estar definidos no .env")
 
 __owner_resources: dict[str, str] = {}
 
@@ -47,12 +39,13 @@ def _make_ssl_context():
     return ctx
 
 
-def get_oauth1_session(resource_owner_key=None, resource_owner_secret=None):
+def get_oauth1_session(resource_owner_key=None, resource_owner_secret=None, callback_uri=None):
     oauth = OAuth1Session(
-        client_key=CLIENT_KEY,
-        client_secret=CLIENT_SECRET,
+        client_key=settings.DML_AUTH_KEY,
+        client_secret=settings.DML_AUTH_SECRET,
         resource_owner_key=resource_owner_key,
         resource_owner_secret=resource_owner_secret,
+        callback_uri=callback_uri
     )
     oauth.mount("https://", TLSAdapter(_make_ssl_context()))
     return oauth
@@ -209,7 +202,7 @@ def get_or_create_user(user_data: dict):
 def create_jwt_for_user(user: User) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=7)
     payload = {"sub": user.email, "exp": expire}
-    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
 def is_mobile_login(oauth_token: str) -> bool:

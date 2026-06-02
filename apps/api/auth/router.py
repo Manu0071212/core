@@ -27,7 +27,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.get("/sso/login")
 def sso_login():
-    oauth = get_oauth1_session()
+    oauth = get_oauth1_session(callback_uri=settings.SSO_CALLBACK_URL)
     fetch_response = oauth.fetch_request_token(REQUEST_TOKEN_URL)
     resource_owner_key    = fetch_response.get("oauth_token")
     resource_owner_secret = fetch_response.get("oauth_token_secret")
@@ -77,7 +77,7 @@ def sso_callback_mobile(oauth_token: str, oauth_verifier: str):
 
 @router.get("/sso/login/mobile")
 def sso_login_mobile(web_redirect: str = ""):
-    oauth = get_oauth1_session()
+    oauth = get_oauth1_session(callback_uri=settings.SSO_CALLBACK_URL)
     fetch_response = oauth.fetch_request_token(REQUEST_TOKEN_URL)
     resource_owner_key    = fetch_response.get("oauth_token")
     resource_owner_secret = fetch_response.get("oauth_token_secret")

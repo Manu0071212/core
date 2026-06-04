@@ -43,7 +43,7 @@ fi
 
 echo "Found Snipe-IT container: $CONTAINER_NAME"
 
-# 2. Wait for Snipe-IT initialization
+# 2a. Wait for Snipe-IT initialization
 echo "Waiting for Snipe-IT container to be fully initialized..."
 MAX_ATTEMPTS=60
 attempt=1
@@ -64,6 +64,53 @@ done
 if [ $attempt -gt $MAX_ATTEMPTS ]; then
     echo "ERROR: Snipe-IT initialization timed out."
     exit 1
+fi
+
+# 2b. Generate APP_KEY if missing or placeholder
+echo "Checking APP_KEY..."
+SNIPEIT_ENV_FILE="$PROJECT_ROOT/infra/snipeit/.env.snipeit"
+CURRENT_KEY=$(grep -E '^APP_KEY=' "$SNIPEIT_ENV_FILE" | head -n 1 | cut -d'=' -f2- | tr -d "'\"")
+if [ -z "$CURRENT_KEY" ] || echo "$CURRENT_KEY" | grep -q "APP_KEY\|CHANGE_ME\|your_"; then
+    echo "APP_KEY is missing or placeholder. Generating..."
+    NEW_KEY=$(docker exec "$CONTAINER_NAME" php artisan key:generate --show --no-interaction 2>/dev/null | grep -oE 'base64:[a-zA-Z0-9+/=]+')
+    if [ -z "$NEW_KEY" ]; then
+        echo "ERROR: Failed to generate APP_KEY."
+        exit 1
+    fi
+    python3 -c "
+        import sys
+        key = sys.argv[1]
+        path = sys.argv[2]
+        with open(path, 'r') as f:
+            lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line.strip().startswith('APP_KEY='):
+                lines[i] = f'APP_KEY={key}\n'
+                break
+        with open(path, 'w') as f:
+            f.writelines(lines)
+        print('APP_KEY saved:', key)
+        " "$NEW_KEY" "$SNIPEIT_ENV_FILE"
+
+    echo "Restarting Snipe-IT to apply new APP_KEY..."
+    docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d snipeit
+    sleep 15
+
+    echo "Waiting for Snipe-IT to be ready again..."
+    attempt=1
+    while [ $attempt -le 30 ]; do
+        if docker exec "$CONTAINER_NAME" php artisan --version >/dev/null 2>&1; then
+            if docker exec "$CONTAINER_NAME" php artisan tinker --execute="App\Models\User::count();" >/dev/null 2>&1; then
+                echo "Snipe-IT ready after APP_KEY update."
+                break
+            fi
+        fi
+        echo -n "."
+        sleep 3
+        attempt=$((attempt+1))
+    done
+else
+    echo "APP_KEY already set."
 fi
 
 # 3. Configure/Initialize settings to skip Snipe-IT setup wizard and enable Remote User login

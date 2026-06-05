@@ -159,6 +159,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+infra/db/.env.postgres
+infra/db/.env.snipeit
 
 # Spyder project settings
 .spyderproject

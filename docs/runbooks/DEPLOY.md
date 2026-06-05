@@ -35,7 +35,8 @@ POSTGRES_DB=makerlab
 
 # Leave blank for now — bootstrap fills this in
 SNIPEIT_API_TOKEN=
-SNIPEIT_RESERVED_STATUS_ID=      # fill in after Step 7
+# fill in after Step 7
+SNIPEIT_RESERVED_STATUS_ID=4
 
 # ─── Public browser-facing URLs ─────────────────────────────────────────────
 # The full public URL where the MakerLab frontend is accessible (no trailing slash).
@@ -68,7 +69,7 @@ nano infra/snipeit/.env.snipeit
 
 Set these values. The DB passwords must match each other:
 ```dotenv
-APP_KEY=                          # leave empty — bootstrap generates this
+APP_KEY=base64:/APP_KEY
 APP_URL=https://deti-makerlab.ua.pt/snipe-it   # or /new/snipe-it if using prefix
 
 DB_PASSWORD=<snipeit db password>
@@ -227,17 +228,20 @@ If migrating data from the legacy Maker Lab Wiki, run the migration module after
 
 ```bash
 cd apps/migration
+
+cp .env.example .env
+
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
 # Dry run first to validate
-python apps/migration/makerlab_migrate/cli.py \
+python3 -m makerlab_migrate.cli \
   --dump-path /path/to/dump-1776931288 \
   --dry-run
 
 # Full migration
-python apps/migration/makerlab_migrate/cli.py \
+python3 -m makerlab_migrate.cli \
   --dump-path /path/to/dump-1776931288
 ```
 

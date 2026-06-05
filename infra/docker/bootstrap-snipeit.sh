@@ -15,7 +15,7 @@ if [ -f "$ENV_FILE" ]; then
 fi
 if [ -z "$FRONTEND_URL" ]; then
     echo "WARNING: FRONTEND_URL not found in apps/api/.env. Using placeholder for Snipe-IT logout URL."
-    echo "         Update FRONTEND_URL in apps/api/.env before deploying."
+    echo "  Update FRONTEND_URL in apps/api/.env before deploying."
     FRONTEND_URL="https://CHANGE_ME"
 fi
 SNIPEIT_LOGOUT_URL="${FRONTEND_URL%/}/api/auth/logout"
@@ -43,7 +43,53 @@ fi
 
 echo "Found Snipe-IT container: $CONTAINER_NAME"
 
-# 2a. Wait for Snipe-IT initialization
+# 2. Ensure APP_KEY is valid
+SNIPEIT_ENV="$PROJECT_ROOT/infra/snipeit/.env.snipeit"
+CURRENT_KEY=$(grep -E '^APP_KEY=' "$SNIPEIT_ENV" | head -n 1 | cut -d'=' -f2-)
+
+if [ -z "$CURRENT_KEY" ] || [ "$CURRENT_KEY" = "base64:/APP_KEY" ] || [ "$CURRENT_KEY" = "CHANGE_ME" ]; then
+    echo "APP_KEY is missing or placeholder. Generating a new one..."
+    NEW_KEY=$(docker exec "$CONTAINER_NAME" php artisan key:generate --show --no-interaction 2>/dev/null | tr -d '\r\n')
+
+    if [ -z "$NEW_KEY" ]; then
+        echo "ERROR: Failed to generate APP_KEY."
+        exit 1
+    fi
+
+    # Update APP_KEY in .env.snipeit
+    python3 -c "
+import sys
+key = sys.argv[1]
+env_path = sys.argv[2]
+with open(env_path, 'r') as f:
+    lines = f.readlines()
+updated = False
+for i, line in enumerate(lines):
+    if line.strip().startswith('APP_KEY='):
+        lines[i] = f'APP_KEY={key}\n'
+        updated = True
+        break
+if not updated:
+    lines.append(f'APP_KEY={key}\n')
+with open(env_path, 'w') as f:
+    f.writelines(lines)
+" "$NEW_KEY" "$SNIPEIT_ENV"
+
+    echo "Generated APP_KEY and saved to $SNIPEIT_ENV"
+    echo "Restarting Snipe-IT container to apply new key..."
+    docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d snipeit
+    sleep 5
+
+    # Re-find container (may have new ID after restart)
+    CONTAINER_NAME=$(docker ps --filter "ancestor=snipe/snipe-it:v8.3.6" --format "{{.Names}}" | head -n 1)
+    if [ -z "$CONTAINER_NAME" ]; then
+        CONTAINER_NAME=$(docker ps --filter "name=snipeit" --format "{{.Names}}" | head -n 1)
+    fi
+else
+    echo "APP_KEY is already set."
+fi
+
+# 3. Wait for Snipe-IT initialization
 echo "Waiting for Snipe-IT container to be fully initialized..."
 MAX_ATTEMPTS=60
 attempt=1
@@ -66,54 +112,7 @@ if [ $attempt -gt $MAX_ATTEMPTS ]; then
     exit 1
 fi
 
-# 2b. Generate APP_KEY if missing or placeholder
-echo "Checking APP_KEY..."
-SNIPEIT_ENV_FILE="$PROJECT_ROOT/infra/snipeit/.env.snipeit"
-CURRENT_KEY=$(grep -E '^APP_KEY=' "$SNIPEIT_ENV_FILE" | head -n 1 | cut -d'=' -f2- | tr -d "'\"")
-if [ -z "$CURRENT_KEY" ] || echo "$CURRENT_KEY" | grep -q "APP_KEY\|CHANGE_ME\|your_"; then
-    echo "APP_KEY is missing or placeholder. Generating..."
-    NEW_KEY=$(docker exec "$CONTAINER_NAME" php artisan key:generate --show --no-interaction 2>/dev/null | grep -oE 'base64:[a-zA-Z0-9+/=]+')
-    if [ -z "$NEW_KEY" ]; then
-        echo "ERROR: Failed to generate APP_KEY."
-        exit 1
-    fi
-    python3 -c "
-        import sys
-        key = sys.argv[1]
-        path = sys.argv[2]
-        with open(path, 'r') as f:
-            lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.strip().startswith('APP_KEY='):
-                lines[i] = f'APP_KEY={key}\n'
-                break
-        with open(path, 'w') as f:
-            f.writelines(lines)
-        print('APP_KEY saved:', key)
-        " "$NEW_KEY" "$SNIPEIT_ENV_FILE"
-
-    echo "Restarting Snipe-IT to apply new APP_KEY..."
-    docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d snipeit
-    sleep 15
-
-    echo "Waiting for Snipe-IT to be ready again..."
-    attempt=1
-    while [ $attempt -le 30 ]; do
-        if docker exec "$CONTAINER_NAME" php artisan --version >/dev/null 2>&1; then
-            if docker exec "$CONTAINER_NAME" php artisan tinker --execute="App\Models\User::count();" >/dev/null 2>&1; then
-                echo "Snipe-IT ready after APP_KEY update."
-                break
-            fi
-        fi
-        echo -n "."
-        sleep 3
-        attempt=$((attempt+1))
-    done
-else
-    echo "APP_KEY already set."
-fi
-
-# 3. Configure/Initialize settings to skip Snipe-IT setup wizard and enable Remote User login
+# 4. Configure/Initialize settings to skip Snipe-IT setup wizard and enable Remote User login
 echo "Configuring Snipe-IT settings..."
 docker exec "$CONTAINER_NAME" php artisan tinker --execute="
 \$s = App\Models\Setting::first() ?? new App\Models\Setting;
@@ -130,7 +129,7 @@ if (!\$s->exists) {
 echo 'Settings configured successfully!';
 "
 
-# 4. Create Admin Account if none exists
+# 5. Create Admin Account if none exists
 echo "Checking existing users..."
 USER_COUNT=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo App\Models\User::count();" | tr -d '\r\n')
 # Clean up any Laravel shell prompt or wrapper junk
@@ -142,7 +141,7 @@ if [ -z "$USER_COUNT" ] || [ "$USER_COUNT" -eq 0 ]; then
     ADMIN_PASS=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)
     # Append a special character and uppercase to satisfy password policies
     ADMIN_PASS="${ADMIN_PASS}aA1!"
-    
+
     docker exec "$CONTAINER_NAME" php artisan snipeit:create-admin \
         --first_name="Technician" \
         --last_name="Admin" \
@@ -150,7 +149,7 @@ if [ -z "$USER_COUNT" ] || [ "$USER_COUNT" -eq 0 ]; then
         --username="admin" \
         --password="$ADMIN_PASS" \
         --no-interaction
-        
+
     echo "Admin created successfully!"
     echo "Username: admin"
     echo "Password: $ADMIN_PASS"
@@ -158,7 +157,7 @@ else
     echo "Admin account already exists ($USER_COUNT users found)."
 fi
 
-# 5. Ensure Passport encryption keys exist
+# 6. Ensure Passport encryption keys exist
 echo "Checking Passport encryption keys..."
 if ! docker exec "$CONTAINER_NAME" test -f storage/oauth-private.key >/dev/null 2>&1; then
     echo "Passport encryption keys missing. Generating keys..."
@@ -170,7 +169,7 @@ else
     docker exec "$CONTAINER_NAME" chown -R docker:root /var/lib/snipeit/keys
 fi
 
-# 6. Generate Personal Access Client if missing
+# 7. Generate Personal Access Client if missing
 echo "Checking personal access client..."
 CLIENT_EXISTS=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo Laravel\Passport\Client::where('personal_access_client', 1)->count();" | tr -d '\r\n')
 CLIENT_EXISTS=$(echo "$CLIENT_EXISTS" | grep -oE '[0-9]+' | head -n 1)
@@ -182,7 +181,7 @@ else
     echo "Personal access client already exists."
 fi
 
-# 7. Generate Personal Access Token
+# 8. Generate Personal Access Token
 echo "Generating API token..."
 TOKEN_OUTPUT=$(docker exec "$CONTAINER_NAME" php artisan tinker --execute="echo App\Models\User::first()->createToken('BootstrapToken')->accessToken;")
 # Clean up token output to make sure it contains only the JWT string
@@ -195,7 +194,7 @@ fi
 
 echo "API Token generated successfully!"
 
-# 8. Update environment variables in apps/api/.env
+# 9. Update environment variables in apps/api/.env
 if [ ! -f "$ENV_FILE" ]; then
     echo "Warning: apps/api/.env file does not exist. Creating from example..."
     cp "$PROJECT_ROOT/apps/api/.env.example" "$ENV_FILE"
@@ -222,7 +221,7 @@ with open(env_path, 'w') as f:
 
 echo "Updated SNIPEIT_API_TOKEN in $ENV_FILE"
 
-# 9. Restart API container
+# 10. Restart API container
 echo "Restarting API service to load the new token..."
 docker compose -f "$PROJECT_ROOT/infra/docker/docker-compose.yml" up -d --build api
 

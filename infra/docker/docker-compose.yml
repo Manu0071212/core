@@ -13,28 +13,28 @@ x-deployment: &deployment
   MAKERLAB_DOMAIN: "deti-makerlab.ua.pt"
   
   # The base path suffix (e.g. "/new", or "" for root path deployment)
-  NEXT_PUBLIC_BASE_PATH: "/new"
+  NEXT_PUBLIC_BASE_PATH: ""
   
   # The public frontend URL (must match domain + base path prefix)
-  FRONTEND_URL: "https://deti-makerlab.ua.pt/new"
+  FRONTEND_URL: "https://deti-makerlab.ua.pt"
   
   # The browser-facing API path prefix (must equal BASE_PATH + "/api")
-  NEXT_PUBLIC_API_URL: "/new/api"
+  NEXT_PUBLIC_API_URL: "/api"
   
   # The full public API URL (must equal domain + API path prefix)
-  API_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/api"
+  API_PUBLIC_URL: "https://deti-makerlab.ua.pt/api"
   
   # The browser-facing Snipe-IT path prefix (must equal BASE_PATH + "/snipe-it")
-  SNIPEIT_PATH: "/new/snipe-it"
+  SNIPEIT_PATH: "/snipe-it"
   
   # The full public Snipe-IT URL for the sidebar link
-  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  NEXT_PUBLIC_SNIPEIT_URL: "https://deti-makerlab.ua.pt/snipe-it"
   
   # The Snipe-IT internal self-URL
-  APP_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  APP_URL: "https://deti-makerlab.ua.pt/snipe-it"
   
   # The public Snipe-IT URL for the backend
-  SNIPEIT_PUBLIC_URL: "https://deti-makerlab.ua.pt/new/snipe-it"
+  SNIPEIT_PUBLIC_URL: "https://deti-makerlab.ua.pt/snipe-it"
 
 services:
   postgres:
